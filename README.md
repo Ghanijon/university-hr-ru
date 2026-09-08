@@ -22,5 +22,6 @@ git checkout main       # вернуться к последней версии
 |---|---|
 | day-01 | README, `docs/01-domain-analysis.md` — анализ предметной области |
 | day-02 | `docs/02-comparison-matrix.md` — сравнение аналогов (1С:ЗУП, BambooHR, Odoo HR, OrangeHRM, Frappe HR) |
+| day-03 | `docs/03-short-spec.md` — краткое ТЗ: требования, user stories, MoSCoW, MVP |
 
 Остальные дни будут добавлены по ходу курса.
