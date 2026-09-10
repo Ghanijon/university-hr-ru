@@ -1,0 +1,46 @@
+@startuml sequence-leave
+' Диаграмма последовательности — согласование заявки заведующим кафедрой
+' Показывает, как HTTP-запрос проходит через слои MVC (дни 12–14)
+title Согласование заявки на отпуск: POST /leaves/{id}/approve
+
+actor "Зав. кафедрой" as Head
+participant "Браузер" as B
+participant "public/index.php\n(front controller)" as FC
+participant "Router" as R
+participant "Csrf" as CS
+participant "Auth" as A
+participant "LeaveController" as LC
+participant "LeaveRequestRules" as Rules
+participant "LeaveRequestRepository" as Repo
+database "MySQL\nuniversity_hr" as DB
+
+Head -> B : нажимает «Согласовать»
+B -> FC : POST /leaves/15/approve\n_csrf=..., cookie PHPSESSID
+FC -> R : dispatch('POST', '/leaves/15/approve')
+R -> LC : approve('15')
+LC -> CS : verify($_POST['_csrf'])
+alt токен неверный
+  CS --> LC : false
+  LC --> B : 419 «Сессия устарела»
+end
+LC -> A : requireRole('admin', 'head', 'hr')
+A --> LC : текущий пользователь (role = head)
+LC -> Repo : find(15)
+Repo -> DB : SELECT ... FROM leave_requests JOIN employees ... WHERE lr.id = ?
+DB --> Repo : строка заявки
+Repo --> LC : $leave (status = pending, department_id = 1)
+LC -> Rules : nextStatus('pending', 'approve', 'head')
+alt переход запрещён или чужая кафедра
+  Rules --> LC : null
+  LC --> B : 302 /leaves + flash «Действие недоступно»
+else переход разрешён
+  Rules --> LC : 'head_approved'
+  LC -> Repo : updateStatus(15, 'head_approved', 'head', userId)
+  Repo -> DB : UPDATE leave_requests SET status = ?, head_decision_by = ? WHERE id = ?
+  DB --> Repo : 1 row affected
+  LC --> B : 302 Location: /leaves + flash «Заявка согласована»
+end
+B -> FC : GET /leaves
+FC --> B : 200 HTML (статус «Согласовано зав. кафедрой»)
+B --> Head : обновлённый список
+@enduml

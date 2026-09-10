@@ -1,0 +1,76 @@
+@startuml use-case
+' Диаграмма вариантов использования (use case) — university-hr
+' День 4. Модель поведения проекта
+title Кадровая ИС вуза «university-hr» — диаграмма вариантов использования
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Сотрудник\n(employee)" as Emp
+actor "Заведующий кафедрой\n(head)" as Head
+actor "Специалист ОК\n(hr)" as HR
+actor "Администратор\n(admin)" as Admin
+
+' Обобщение акторов: заведующий тоже сотрудник,
+' администратор может всё, что специалист ОК
+Head --|> Emp
+Admin --|> HR
+
+rectangle "university-hr" {
+  usecase "Войти в систему" as UC_Login
+  usecase "Проверить логин и пароль" as UC_Check
+  usecase "Подать заявку на отпуск" as UC_Leave
+  usecase "Просмотреть свои заявки" as UC_MyLeaves
+  usecase "Проверить даты отпуска" as UC_Dates
+  usecase "Согласовать заявку\n(1-й уровень)" as UC_HeadApprove
+  usecase "Утвердить заявку\n(2-й уровень)" as UC_HrApprove
+  usecase "Отклонить заявку" as UC_Reject
+  usecase "Найти сотрудника" as UC_Search
+  usecase "Живой поиск\n(подсказки)" as UC_Live
+  usecase "Просмотреть карточку" as UC_View
+  usecase "Добавить / изменить\nсотрудника" as UC_Edit
+  usecase "Загрузить фото" as UC_Photo
+  usecase "Удалить сотрудника" as UC_Delete
+  usecase "Оформить приказ" as UC_Order
+  usecase "Отчёт «штат\nпо кафедрам»" as UC_Report
+  usecase "Вести справочники\n(кафедры, должности)" as UC_Dict
+  usecase "Управлять\nпользователями" as UC_Users
+}
+
+Emp --> UC_Login
+Emp --> UC_Leave
+Emp --> UC_MyLeaves
+
+Head --> UC_HeadApprove
+Head --> UC_Search
+Head --> UC_View
+Head --> UC_Report
+
+HR --> UC_Search
+HR --> UC_View
+HR --> UC_Edit
+HR --> UC_Delete
+HR --> UC_HrApprove
+HR --> UC_Order
+HR --> UC_Report
+
+Admin --> UC_Dict
+Admin --> UC_Users
+Admin --> UC_HeadApprove
+
+' include — обязательная часть другого варианта
+UC_Login ..> UC_Check : <<include>>
+UC_Leave ..> UC_Dates : <<include>>
+UC_HeadApprove ..> UC_View : <<include>>
+
+' extend — необязательное расширение
+UC_Reject .> UC_HeadApprove : <<extend>>
+UC_Reject .> UC_HrApprove : <<extend>>
+UC_Photo .> UC_Edit : <<extend>>
+UC_Live .> UC_Search : <<extend>>
+
+note right of UC_HrApprove
+  Доступно только для заявок
+  в статусе head_approved
+end note
+@enduml
