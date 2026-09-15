@@ -1,0 +1,174 @@
+@startuml class
+' Диаграмма классов — university-hr (MVC, PHP 8)
+' День 5. Модель структуры проекта
+title university-hr — диаграмма классов (пространство имён App\\)
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "App\\Core" {
+  class Router {
+    - routes : array
+    + get(path : string, handler : array) : void
+    + post(path : string, handler : array) : void
+    + dispatch(method : string, uri : string) : void
+    - toRegex(path : string) : string
+  }
+  class Database {
+    - {static} pdo : ?PDO
+    + {static} connection() : PDO
+  }
+  class View {
+    + render(template : string, data : array) : string
+    + e(value : mixed) : string
+    + url(path : string) : string
+  }
+  class Session {
+    + {static} start() : void
+    + {static} get(key : string) : mixed
+    + {static} set(key : string, value : mixed) : void
+    + {static} flash(key : string, message : string) : void
+    + {static} getFlash(key : string) : ?string
+    + {static} regenerate() : void
+    + {static} destroy() : void
+  }
+  class Csrf {
+    + {static} token() : string
+    + {static} field() : string
+    + {static} verify(token : ?string) : bool
+  }
+  class Auth {
+    + {static} attempt(username : string, password : string) : bool
+    + {static} user() : ?array
+    + {static} check() : bool
+    + {static} hasRole(roles : string...) : bool
+    + {static} requireLogin() : void
+    + {static} requireRole(roles : string...) : void
+    + {static} logout() : void
+  }
+  class Validator {
+    - data : array
+    - errors : array
+    + required(field, label) : self
+    + maxLength(field, max, label) : self
+    + email(field, label) : self
+    + date(field, label) : self
+    + in(field, allowed, label) : self
+    + fails() : bool
+    + errors() : array
+  }
+}
+
+package "App\\Services" {
+  class LeaveRequestRules {
+    + {static} MAX_ANNUAL_DAYS = 56
+    + {static} validateDates(start, end, type, today) : array
+    + {static} days(start, end) : int
+    + {static} nextStatus(current, action, role) : ?string
+  }
+}
+
+package "App\\Controllers" {
+  abstract class Controller {
+    # view : View
+    # render(template, data) : void
+    # redirect(path) : never
+    # verifyCsrf() : void
+    # abort(code, message) : never
+  }
+  class AuthController {
+    + showLogin() : void
+    + login() : void
+    + logout() : void
+  }
+  class DashboardController {
+    + index() : void
+  }
+  class EmployeeController {
+    + index() : void
+    + show(id) : void
+    + create() : void
+    + store() : void
+    + edit(id) : void
+    + update(id) : void
+    + delete(id) : void
+    + apiSearch() : void
+  }
+  class DepartmentController {
+    + index() : void
+  }
+  class LeaveController {
+    + index() : void
+    + create() : void
+    + store() : void
+    + approve(id) : void
+    + reject(id) : void
+  }
+  class ReportController {
+    + staff() : void
+  }
+}
+
+package "App\\Repositories" {
+  class EmployeeRepository {
+    + paginate(filters, page, perPage) : array
+    + find(id) : ?array
+    + create(data) : int
+    + update(id, data) : void
+    + delete(id) : void
+    + search(q, departmentId, limit) : array
+    + emailExists(email, exceptId) : bool
+    + countByStatus() : array
+  }
+  class DepartmentRepository {
+    + all() : array
+    + find(id) : ?array
+    + staffReport() : array
+  }
+  class PositionRepository {
+    + all() : array
+  }
+  class LeaveRequestRepository {
+    + list(filters, page, perPage) : array
+    + find(id) : ?array
+    + create(data) : int
+    + setHeadDecision(id, status, userId) : void
+    + setHrDecision(id, status, userId) : void
+    + countPending(departmentId) : int
+  }
+  class UserRepository {
+    + findByUsername(username) : ?array
+    + touchLastLogin(id) : void
+  }
+}
+
+Controller <|-- AuthController
+Controller <|-- DashboardController
+Controller <|-- EmployeeController
+Controller <|-- DepartmentController
+Controller <|-- LeaveController
+Controller <|-- ReportController
+Controller o--> View
+
+Router ..> Controller : вызывает метод
+AuthController ..> Auth
+Auth ..> UserRepository
+EmployeeController ..> EmployeeRepository
+EmployeeController ..> DepartmentRepository
+EmployeeController ..> PositionRepository
+EmployeeController ..> Validator
+DepartmentController ..> DepartmentRepository
+LeaveController ..> LeaveRequestRepository
+LeaveController ..> LeaveRequestRules
+LeaveController ..> Validator
+ReportController ..> DepartmentRepository
+DashboardController ..> EmployeeRepository
+DashboardController ..> LeaveRequestRepository
+
+EmployeeRepository ..> Database
+DepartmentRepository ..> Database
+PositionRepository ..> Database
+LeaveRequestRepository ..> Database
+UserRepository ..> Database
+Auth ..> Session
+Csrf ..> Session
+@enduml

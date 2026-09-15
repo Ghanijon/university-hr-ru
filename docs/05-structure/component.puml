@@ -1,0 +1,49 @@
+@startuml component
+' Диаграмма компонентов и трёхуровневая архитектура university-hr
+title university-hr — компоненты (клиент — сервер — БД)
+
+node "Клиент (браузер)" {
+  [HTML-страницы\n(Bootstrap 5.3)] as UI
+  [app.js\n(валидация, живой поиск)] as JS
+}
+
+node "Веб-сервер (Nginx + PHP-FPM)" {
+  [public/index.php\nFront controller] as FC
+  component "Core" {
+    [Router] as R
+    [Session / Auth / Csrf] as SEC
+    [View] as V
+    [Validator] as VAL
+  }
+  [Controllers] as C
+  [Services\n(LeaveRequestRules)] as S
+  [Repositories] as REP
+  [views/*.php\n(шаблоны)] as T
+  [public/uploads\n(фото)] as UP
+}
+
+database "MySQL / MariaDB\nuniversity_hr" as DB
+
+UI --> FC : HTTP GET/POST\n(cookie сессии)
+JS --> FC : fetch /api/employees?q=\n(JSON)
+FC --> R
+R --> C
+C --> SEC
+C --> VAL
+C --> S
+C --> REP
+C --> V
+V --> T
+C --> UP : move_uploaded_file()
+REP --> DB : PDO\nprepared statements
+
+note bottom of DB
+  Уровень данных
+end note
+note right of C
+  Уровень логики (Controller + Service + Repository = Model)
+end note
+note left of UI
+  Уровень представления
+end note
+@enduml
