@@ -25,5 +25,6 @@ git checkout main       # вернуться к последней версии
 | day-03 | `docs/03-short-spec.md` — краткое ТЗ: требования, user stories, MoSCoW, MVP |
 | day-04 | `docs/04-behavior/` — use case, activity «Оформление отпуска», sequence «Согласование заявки» (PlantUML) |
 | day-05 | `docs/05-structure/` — диаграмма классов (MVC) и диаграмма компонентов |
+| day-06 | `docs/06-er-diagram.puml`, `docs/06-logical-model.md` — ER-диаграмма, связи, нормализация до 3НФ |
 
 Остальные дни будут добавлены по ходу курса.

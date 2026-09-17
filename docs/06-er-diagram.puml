@@ -1,0 +1,94 @@
+@startuml er-diagram
+' ER-диаграмма (логическая модель) university-hr в нотации «вороньи лапки» (IE)
+' День 6. Логическая структура базы данных
+title university-hr — ER-диаграмма (логическая модель, 3НФ)
+hide circle
+skinparam linetype ortho
+
+entity "faculties\nФакультет" as faculties {
+  * id : INT <<PK>>
+  --
+  * name : VARCHAR(150) <<UNIQUE>>
+}
+
+entity "departments\nКафедра" as departments {
+  * id : INT <<PK>>
+  --
+  * faculty_id : INT <<FK>>
+  * name : VARCHAR(150)
+  head_employee_id : INT <<FK, NULL>>
+}
+
+entity "positions\nДолжность" as positions {
+  * id : INT <<PK>>
+  --
+  * title : VARCHAR(100) <<UNIQUE>>
+  * category : ENUM(academic, administrative, support)
+}
+
+entity "employees\nСотрудник" as employees {
+  * id : INT <<PK>>
+  --
+  * last_name : VARCHAR(60)
+  * first_name : VARCHAR(60)
+  middle_name : VARCHAR(60)
+  * birth_date : DATE
+  * gender : ENUM(m, f)
+  phone : VARCHAR(20)
+  email : VARCHAR(120) <<UNIQUE>>
+  * department_id : INT <<FK>>
+  * position_id : INT <<FK>>
+  * academic_degree : ENUM(none, candidate, doctor, phd)
+  * hire_date : DATE
+  * status : ENUM(active, on_leave, dismissed)
+  photo_path : VARCHAR(255)
+  * created_at : TIMESTAMP
+  * updated_at : TIMESTAMP
+}
+
+entity "users\nПользователь" as users {
+  * id : INT <<PK>>
+  --
+  employee_id : INT <<FK, UNIQUE, NULL>>
+  * username : VARCHAR(50) <<UNIQUE>>
+  * password_hash : VARCHAR(255)
+  * role : ENUM(admin, hr, head, employee)
+  * is_active : TINYINT(1)
+  last_login_at : DATETIME
+}
+
+entity "orders\nПриказ" as orders {
+  * id : INT <<PK>>
+  --
+  * number : VARCHAR(30) <<UNIQUE>>
+  * type : ENUM(hire, transfer, dismissal, leave)
+  * employee_id : INT <<FK>>
+  * order_date : DATE
+  * text : TEXT
+  * created_by : INT <<FK>>
+}
+
+entity "leave_requests\nЗаявка на отпуск" as leave_requests {
+  * id : INT <<PK>>
+  --
+  * employee_id : INT <<FK>>
+  * type : ENUM(annual, study, unpaid, sick)
+  * start_date : DATE
+  * end_date : DATE
+  reason : VARCHAR(255)
+  * status : ENUM(pending, head_approved, approved, rejected)
+  head_decision_by : INT <<FK, NULL>>
+  hr_decision_by : INT <<FK, NULL>>
+  * created_at : TIMESTAMP
+}
+
+faculties ||--o{ departments : включает
+departments ||--o{ employees : числится
+positions ||--o{ employees : занимает
+employees |o--o| departments : заведует
+employees |o--o| users : учётная запись
+employees ||--o{ orders : касается
+users ||--o{ orders : создал
+employees ||--o{ leave_requests : подаёт
+users |o--o{ leave_requests : решение зав. / ОК
+@enduml
