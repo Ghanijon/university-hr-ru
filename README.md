@@ -26,5 +26,6 @@ git checkout main       # вернуться к последней версии
 | day-04 | `docs/04-behavior/` — use case, activity «Оформление отпуска», sequence «Согласование заявки» (PlantUML) |
 | day-05 | `docs/05-structure/` — диаграмма классов (MVC) и диаграмма компонентов |
 | day-06 | `docs/06-er-diagram.puml`, `docs/06-logical-model.md` — ER-диаграмма, связи, нормализация до 3НФ |
+| day-07 | `database/schema.sql`, `seed.sql`, `queries.sql`, `docs/07-deployment.puml` — физическая модель, тестовые данные, контрольные запросы |
 
 Остальные дни будут добавлены по ходу курса.

@@ -1,0 +1,44 @@
+@startuml deployment
+' Диаграмма развёртывания university-hr
+' День 7 (физическая модель); используется снова на день 16 (публикация)
+title university-hr — диаграмма развёртывания
+
+node "Компьютер пользователя" as PC <<device>> {
+  node "Веб-браузер\n(Chrome / Firefox / Edge)" as Browser <<execution environment>>
+}
+
+node "Смартфон заведующего" as Phone <<device>> {
+  node "Мобильный браузер" as MBrowser <<execution environment>>
+}
+
+cloud "Интернет / локальная сеть института" as Net
+
+node "VDS: Ubuntu 24.04 LTS\n1 vCPU, 1–2 ГБ RAM" as VDS <<device>> {
+  node "Nginx 1.24\n:80 → :443 (HTTPS, Let's Encrypt)" as Nginx <<web server>>
+  node "PHP-FPM 8.3\nпул www, unix-сокет" as FPM <<execution environment>> {
+    artifact "university-hr\n(public/index.php, src/, views/)" as App
+    artifact "vendor/ (Composer autoload)" as Vendor
+  }
+  node "MySQL 8 / MariaDB 10.11\n127.0.0.1:3306" as MySQL <<database server>> {
+    database "university_hr\n(utf8mb4)" as DB
+  }
+  folder "/var/www/university-hr/public/uploads" as Uploads
+  artifact "cron: mysqldump\nежедневно 02:30" as Backup
+  folder "/var/backups/university-hr" as BackupDir
+}
+
+Browser -- Net : HTTPS
+MBrowser -- Net : HTTPS
+Net -- Nginx : TCP 443
+Nginx --> FPM : FastCGI\nunix:/run/php/php8.3-fpm.sock
+Nginx --> Uploads : статические файлы\n(фото, CSS, JS)
+App --> DB : PDO, TCP 3306\n(только localhost)
+App --> Uploads : move_uploaded_file()
+Backup --> DB : mysqldump
+Backup --> BackupDir : .sql.gz
+
+note right of MySQL
+  Порт 3306 закрыт снаружи (ufw),
+  доступ только с localhost
+end note
+@enduml
