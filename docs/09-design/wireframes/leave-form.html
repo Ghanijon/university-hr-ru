@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вайрфрейм: Новая заявка</title>
+<link rel="stylesheet" href="wf.css">
+</head>
+<body>
+<header>
+  <div class="logo" title="Логотип"></div>
+  <nav><span>Главная</span><span>Сотрудники</span><span>Кафедры</span><span class="active">Отпуска</span><span>Отчёт</span></nav>
+  <div class="user"><span class="avatar"></span><span>teacher1 · Сотрудник</span><span class="btn sm">Выйти</span></div>
+  <div class="burger" title="Меню"></div>
+</header>
+<main style="max-width:640px">
+  <h1>Новая заявка на отпуск</h1>
+  <div class="box">
+    <div class="field"><label>Сотрудник</label><div class="input">Рахимов Фарход Джамшедович (вы)</div><div class="hint">Для ОК — выпадающий список сотрудников</div></div>
+    <div class="field"><label>Тип отпуска *</label><div class="input">Ежегодный ▾</div></div>
+    <div class="row">
+      <div class="col field"><label>Дата начала *</label><div class="input">дд.мм.гггг</div></div>
+      <div class="col field"><label>Дата окончания *</label><div class="input err">дд.мм.гггг</div><div class="err-text">Дата окончания раньше даты начала</div></div>
+    </div>
+    <p class="hint">Длительность: 21 календарный день (считается автоматически)</p>
+    <div class="field"><label>Причина / комментарий</label><div class="input" style="height:80px">&nbsp;</div></div>
+    <div class="toolbar"><span class="btn primary">Отправить на согласование</span><span class="btn">Отмена</span></div>
+  </div>
+</main>
+<div class="wf-note">Вайрфрейм · /leaves/create</div>
+</body>
+</html>

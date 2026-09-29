@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вайрфрейм: Форма сотрудника</title>
+<link rel="stylesheet" href="wf.css">
+</head>
+<body>
+<header>
+  <div class="logo" title="Логотип"></div>
+  <nav><span>Главная</span><span class="active">Сотрудники</span><span>Кафедры</span><span>Отпуска</span><span>Отчёт</span></nav>
+  <div class="user"><span class="avatar"></span><span>hr · Отдел кадров</span><span class="btn sm">Выйти</span></div>
+  <div class="burger" title="Меню"></div>
+</header>
+<main style="max-width:900px">
+  <h1>Новый сотрудник</h1>
+  <div class="box">
+    <div class="row">
+      <div class="col field"><label>Фамилия *</label><div class="input err">&nbsp;</div><div class="err-text">Поле «Фамилия» обязательно</div></div>
+      <div class="col field"><label>Имя *</label><div class="input">&nbsp;</div></div>
+      <div class="col field"><label>Отчество</label><div class="input">&nbsp;</div></div>
+    </div>
+    <div class="row">
+      <div class="col field"><label>Дата рождения *</label><div class="input">дд.мм.гггг</div></div>
+      <div class="col field"><label>Пол *</label><div class="input">○ Мужской ○ Женский</div></div>
+      <div class="col field"><label>Учёная степень</label><div class="input">Нет ▾</div></div>
+    </div>
+    <div class="row">
+      <div class="col field"><label>Телефон</label><div class="input">+992 __ ___ __ __</div></div>
+      <div class="col field"><label>E-mail</label><div class="input">name@example.tj</div></div>
+    </div>
+    <div class="row">
+      <div class="col field"><label>Кафедра *</label><div class="input">Выберите кафедру ▾</div></div>
+      <div class="col field"><label>Должность *</label><div class="input">Выберите должность ▾</div></div>
+    </div>
+    <div class="row">
+      <div class="col field"><label>Дата приёма *</label><div class="input">дд.мм.гггг</div></div>
+      <div class="col field"><label>Статус</label><div class="input">Работает ▾</div></div>
+    </div>
+    <div class="field"><label>Фото</label>
+      <div class="row" style="align-items:center"><div class="ph" style="width:96px;height:120px">Превью</div><div class="col"><div class="input">Выбрать файл…</div><div class="hint">JPEG, PNG или WebP, не более 2 МБ</div></div></div>
+    </div>
+    <div class="toolbar"><span class="btn primary">Сохранить</span><span class="btn">Отмена</span></div>
+    <div class="anno">Проверка в браузере (JS) при вводе + обязательная проверка на сервере (PHP)</div>
+  </div>
+</main>
+<div class="wf-note">Вайрфрейм · /employees/create</div>
+</body>
+</html>

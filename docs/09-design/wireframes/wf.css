@@ -1,0 +1,60 @@
+/* Вайрфреймы university-hr: только оттенки серого, без шрифтов и цветов макета */
+* { box-sizing: border-box; }
+body { margin: 0; font: 15px/1.5 Arial, sans-serif; color: #333; background: #f2f2f2; }
+.wf-note { position: fixed; right: 8px; bottom: 8px; font-size: 12px; color: #777; background: #fff; border: 1px dashed #999; padding: 4px 8px; }
+header { background: #555; color: #fff; display: flex; align-items: center; gap: 24px; padding: 0 24px; height: 56px; }
+header .logo { width: 140px; height: 24px; background: #999; }
+header nav { display: flex; gap: 16px; flex: 1; }
+header nav span { padding: 4px 0; border-bottom: 2px solid transparent; }
+header nav span.active { border-color: #fff; }
+header .user { display: flex; align-items: center; gap: 8px; }
+.burger { display: none; width: 28px; height: 20px; border-top: 3px solid #fff; border-bottom: 3px solid #fff; position: relative; }
+.burger::after { content: ""; position: absolute; left: 0; right: 0; top: 5px; border-top: 3px solid #fff; }
+main { max-width: 1140px; margin: 0 auto; padding: 24px; }
+h1 { font-size: 26px; margin: 0 0 16px; }
+h2 { font-size: 20px; margin: 0 0 12px; }
+.row { display: flex; gap: 24px; flex-wrap: wrap; }
+.col { flex: 1 1 0; min-width: 220px; }
+.box { background: #fff; border: 1px solid #bbb; border-radius: 6px; padding: 24px; margin-bottom: 24px; }
+.ph { background: #ddd; border: 1px solid #bbb; display: flex; align-items: center; justify-content: center; color: #777; font-size: 13px; }
+.btn { display: inline-block; padding: 8px 16px; border: 2px solid #555; border-radius: 6px; background: #fff; font-size: 14px; }
+.btn.primary { background: #555; color: #fff; }
+.btn.danger { border-style: dashed; }
+.btn.sm { padding: 3px 10px; font-size: 13px; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 13px; margin-bottom: 4px; }
+.input { height: 40px; border: 1px solid #999; border-radius: 6px; background: #fff; padding: 9px 12px; color: #999; }
+.input.err { border: 2px solid #333; }
+.hint { font-size: 12px; color: #666; margin-top: 4px; }
+.err-text { font-size: 12px; font-weight: bold; margin-top: 4px; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #ccc; }
+th { background: #e6e6e6; font-size: 13px; }
+.badge { display: inline-block; padding: 1px 10px; border: 1px solid #777; border-radius: 999px; font-size: 12px; background: #eee; }
+.badge.dark { background: #777; color: #fff; }
+.toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+.toolbar .input { flex: 1 1 240px; }
+.pager { display: flex; gap: 6px; justify-content: center; margin-top: 16px; }
+.pager span { border: 1px solid #999; padding: 4px 10px; background: #fff; }
+.pager span.cur { background: #555; color: #fff; }
+.stat { text-align: center; }
+.stat .num { font-size: 32px; font-weight: bold; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: #ccc; display: inline-block; vertical-align: middle; }
+.anno { border: 1px dashed #999; padding: 4px 8px; font-size: 12px; color: #666; margin-top: 8px; }
+.suggest { border: 1px solid #999; background: #fff; margin-top: -12px; margin-bottom: 16px; }
+.suggest div { padding: 6px 12px; border-bottom: 1px solid #ddd; font-size: 14px; }
+.tabs { display: flex; gap: 0; border-bottom: 2px solid #999; margin-bottom: 16px; flex-wrap: wrap; }
+.tabs span { padding: 8px 14px; }
+.tabs span.cur { background: #555; color: #fff; }
+dl { display: grid; grid-template-columns: 180px 1fr; gap: 8px 16px; margin: 0; }
+dt { color: #666; }
+.cards-mobile { display: none; }
+@media (max-width: 700px) {
+  header nav, header .user span { display: none; }
+  .burger { display: block; margin-left: auto; }
+  main { padding: 16px; }
+  .table-desktop { display: none; }
+  .cards-mobile { display: block; }
+  .cards-mobile .box { padding: 16px; margin-bottom: 12px; }
+  dl { grid-template-columns: 1fr; }
+}

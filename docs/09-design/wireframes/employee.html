@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вайрфрейм: Карточка сотрудника</title>
+<link rel="stylesheet" href="wf.css">
+</head>
+<body>
+<header>
+  <div class="logo" title="Логотип"></div>
+  <nav><span>Главная</span><span class="active">Сотрудники</span><span>Кафедры</span><span>Отпуска</span><span>Отчёт</span></nav>
+  <div class="user"><span class="avatar"></span><span>hr · Отдел кадров</span><span class="btn sm">Выйти</span></div>
+  <div class="burger" title="Меню"></div>
+</header>
+<main>
+  <p class="hint">Сотрудники › Рахимов Фарход Джамшедович</p>
+  <div class="row">
+    <div class="col box" style="flex:0 0 260px;text-align:center">
+      <div class="ph" style="width:160px;height:200px;margin:0 auto 16px">Фото 3×4</div>
+      <h2>Рахимов Фарход Джамшедович</h2>
+      <span class="badge">Работает</span>
+    </div>
+    <div class="col box">
+      <h2>Служебные данные</h2>
+      <dl>
+        <dt>Кафедра</dt><dd>Программирования и информационных систем</dd>
+        <dt>Факультет</dt><dd>Информационных технологий и коммуникаций</dd>
+        <dt>Должность</dt><dd>Старший преподаватель</dd>
+        <dt>Учёная степень</dt><dd>Нет</dd>
+        <dt>Дата приёма</dt><dd>01.09.2014 (стаж 12 лет)</dd>
+      </dl>
+      <h2 style="margin-top:24px">Личные данные</h2>
+      <dl>
+        <dt>Дата рождения</dt><dd>21.06.1990</dd>
+        <dt>Пол</dt><dd>Мужской</dd>
+        <dt>Телефон</dt><dd>+992 92 701 11 02</dd>
+        <dt>E-mail</dt><dd>f.rahimov@example.tj</dd>
+      </dl>
+      <div class="toolbar" style="margin-top:24px"><span class="btn primary">Редактировать</span><span class="btn danger">Удалить</span></div>
+      <div class="anno">Кнопки видны только ролям admin и hr. «Удалить» открывает модальное окно подтверждения</div>
+    </div>
+  </div>
+  <div class="box">
+    <h2>Заявки на отпуск</h2>
+    <table><tr><th>Тип</th><th>Период</th><th>Дней</th><th>Статус</th></tr>
+    <tr><td>Ежегодный</td><td>21.12.2026 – 10.01.2027</td><td>21</td><td><span class="badge">Ожидает</span></td></tr></table>
+  </div>
+</main>
+<div class="wf-note">Вайрфрейм · /employees/{id}</div>
+</body>
+</html>

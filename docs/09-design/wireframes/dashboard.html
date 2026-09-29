@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вайрфрейм: Главная</title>
+<link rel="stylesheet" href="wf.css">
+</head>
+<body>
+<header>
+  <div class="logo" title="Логотип"></div>
+  <nav><span class="active">Главная</span><span>Сотрудники</span><span>Кафедры</span><span>Отпуска</span><span>Отчёт</span></nav>
+  <div class="user"><span class="avatar"></span><span>hr · Отдел кадров</span><span class="btn sm">Выйти</span></div>
+  <div class="burger" title="Меню"></div>
+</header>
+<main>
+  <h1>Добро пожаловать, hr</h1>
+  <div class="row">
+    <div class="col box stat"><div class="num">44</div>Работают</div>
+    <div class="col box stat"><div class="num">2</div>В отпуске</div>
+    <div class="col box stat"><div class="num">2</div>Заявки ждут вашего решения</div>
+    <div class="col box stat"><div class="num">10</div>Кафедр</div>
+  </div>
+  <div class="row">
+    <div class="col box" style="flex:2">
+      <h2>Последние заявки на отпуск</h2>
+      <table>
+        <tr><th>Сотрудник</th><th>Период</th><th>Статус</th></tr>
+        <tr><td>Рахимов Ф. Д.</td><td>21.12.2026 – 10.01.2027</td><td><span class="badge">Ожидает</span></td></tr>
+        <tr><td>Хамидова М. Р.</td><td>16.11.2026 – 27.11.2026</td><td><span class="badge">Согласовано зав. кафедрой</span></td></tr>
+        <tr><td>Назарова М. Т.</td><td>26.10.2026 – 20.11.2026</td><td><span class="badge dark">Утверждено</span></td></tr>
+      </table>
+      <p><span class="btn sm">Все заявки →</span></p>
+    </div>
+    <div class="col box">
+      <h2>Быстрые действия</h2>
+      <p><span class="btn primary">+ Новый сотрудник</span></p>
+      <p><span class="btn">Подать заявку на отпуск</span></p>
+      <p><span class="btn">Отчёт «штат по кафедрам»</span></p>
+      <div class="anno">Набор кнопок зависит от роли</div>
+    </div>
+  </div>
+</main>
+<div class="wf-note">Вайрфрейм · /</div>
+</body>
+</html>

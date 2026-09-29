@@ -28,5 +28,6 @@ git checkout main       # вернуться к последней версии
 | day-06 | `docs/06-er-diagram.puml`, `docs/06-logical-model.md` — ER-диаграмма, связи, нормализация до 3НФ |
 | day-07 | `database/schema.sql`, `seed.sql`, `queries.sql`, `docs/07-deployment.puml` — физическая модель, тестовые данные, контрольные запросы |
 | day-08 | `docs/08-technical-specification.md` — полное ТЗ по мотивам ГОСТ 34.602 |
+| day-09 | `docs/09-design/` — UI-kit и статичные HTML-вайрфреймы (замена Figma-файла) |
 
 Остальные дни будут добавлены по ходу курса.

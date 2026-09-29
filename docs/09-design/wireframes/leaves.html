@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вайрфрейм: Заявки на отпуск</title>
+<link rel="stylesheet" href="wf.css">
+</head>
+<body>
+<header>
+  <div class="logo" title="Логотип"></div>
+  <nav><span>Главная</span><span>Сотрудники</span><span>Кафедры</span><span class="active">Отпуска</span><span>Отчёт</span></nav>
+  <div class="user"><span class="avatar"></span><span>head_pis · Зав. кафедрой</span><span class="btn sm">Выйти</span></div>
+  <div class="burger" title="Меню"></div>
+</header>
+<main>
+  <div class="toolbar"><h1 style="margin:0;flex:1">Заявки на отпуск</h1><span class="btn primary">+ Подать заявку</span></div>
+  <div class="tabs"><span>Все</span><span class="cur">Ожидают (2)</span><span>Согласованы</span><span>Утверждены</span><span>Отклонены</span></div>
+  <table>
+    <tr><th>Сотрудник</th><th>Тип</th><th>Период</th><th>Дней</th><th>Статус</th><th>Действия</th></tr>
+    <tr><td>Рахимов Ф. Д.</td><td>Ежегодный</td><td>21.12.2026 – 10.01.2027</td><td>21</td><td><span class="badge">Ожидает</span></td><td><span class="btn sm primary">Согласовать</span> <span class="btn sm danger">Отклонить</span></td></tr>
+    <tr><td>Назаров Д. Х.</td><td>Ежегодный</td><td>05.01.2027 – 25.01.2027</td><td>21</td><td><span class="badge">Ожидает</span></td><td><span class="hint">Своя заявка — решает администратор</span></td></tr>
+  </table>
+  <div class="anno">Кнопки зависят от роли и статуса: зав. кафедрой — «Согласовать» для pending; ОК — «Утвердить» для head_approved</div>
+</main>
+<div class="wf-note">Вайрфрейм · /leaves</div>
+</body>
+</html>
