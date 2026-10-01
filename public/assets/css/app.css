@@ -1,0 +1,151 @@
+/* =====================================================================
+   university-hr — стили приложения поверх Bootstrap 5.3
+   Цвета, шрифты и отступы — из UI-kit (docs/09-design/ui-kit.md)
+   ===================================================================== */
+
+/* 1. Токены дизайна (CSS-переменные) */
+:root {
+  --hr-primary: #1D4F91;
+  --hr-primary-dark: #163C6E;
+  --hr-primary-light: #E8EFF8;
+  --hr-bg: #F4F6F9;
+  --hr-surface: #FFFFFF;
+  --hr-border: #DDE2E8;
+  --hr-text: #1F2733;
+  --hr-muted: #5D6B7E;
+  --hr-success: #1E7B4F;
+  --hr-warning: #9A6100;
+  --hr-info: #1F6FA8;
+  --hr-danger: #B42318;
+  --hr-radius: 8px;
+
+  /* Переопределяем переменные Bootstrap, чтобы его компоненты взяли наши цвета */
+  --bs-body-font-family: "Inter", system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+  --bs-body-font-size: 0.9375rem;      /* 15px */
+  --bs-body-color: var(--hr-text);
+  --bs-body-bg: var(--hr-bg);
+  --bs-border-color: var(--hr-border);
+  --bs-border-radius: var(--hr-radius);
+  --bs-link-color: var(--hr-primary);
+  --bs-link-color-rgb: 29, 79, 145;
+  --bs-link-hover-color-rgb: 22, 60, 110;
+  --bs-primary: var(--hr-primary);
+  --bs-primary-rgb: 29, 79, 145;
+  --bs-secondary-color: var(--hr-muted);
+}
+
+/* 2. Базовая типографика */
+h1, .h1 { font-size: 1.75rem; font-weight: 600; line-height: 1.3; }
+h2, .h2 { font-size: 1.375rem; font-weight: 600; }
+h3, .h3 { font-size: 1.125rem; font-weight: 600; }
+.text-muted { color: var(--hr-muted) !important; }
+
+/* 3. Кнопки основного цвета */
+.btn-primary {
+  --bs-btn-bg: var(--hr-primary);
+  --bs-btn-border-color: var(--hr-primary);
+  --bs-btn-hover-bg: var(--hr-primary-dark);
+  --bs-btn-hover-border-color: var(--hr-primary-dark);
+  --bs-btn-active-bg: var(--hr-primary-dark);
+  --bs-btn-active-border-color: var(--hr-primary-dark);
+  --bs-btn-disabled-bg: var(--hr-primary);
+  --bs-btn-disabled-border-color: var(--hr-primary);
+}
+.btn-outline-primary {
+  --bs-btn-color: var(--hr-primary);
+  --bs-btn-border-color: var(--hr-primary);
+  --bs-btn-hover-bg: var(--hr-primary);
+  --bs-btn-hover-border-color: var(--hr-primary);
+  --bs-btn-active-bg: var(--hr-primary-dark);
+}
+.btn { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: .375rem; }
+.btn-sm { min-height: 32px; }
+.form-control, .form-select { min-height: 40px; }
+:focus-visible { outline: 3px solid rgba(29, 79, 145, .45); outline-offset: 2px; }
+
+/* 4. Шапка */
+.app-navbar { background: var(--hr-primary); }
+.app-navbar .navbar-brand { font-weight: 600; letter-spacing: .2px; }
+.app-navbar .nav-link { color: rgba(255, 255, 255, .85); }
+.app-navbar .nav-link:hover,
+.app-navbar .nav-link.active { color: #fff; }
+.app-navbar .nav-link.active { box-shadow: inset 0 -3px 0 #fff; }
+.role-badge { background: rgba(255, 255, 255, .18); color: #fff; font-weight: 400; }
+
+/* 5. Карточки и таблицы */
+.card { border-color: var(--hr-border); box-shadow: 0 1px 2px rgba(16, 24, 40, .06); }
+.card-header { background: var(--hr-surface); font-weight: 600; }
+.stat-card .stat-number { font-size: 2rem; font-weight: 600; line-height: 1.25; color: var(--hr-primary); }
+.stat-card .stat-label { color: var(--hr-muted); }
+.table { --bs-table-hover-bg: var(--hr-primary-light); margin-bottom: 0; }
+.table > :not(caption) > * > * { padding: .75rem .75rem; }
+.table a:not(.btn) { text-decoration: none; font-weight: 600; }
+.table a:not(.btn):hover { text-decoration: underline; }
+.pagination {
+  --bs-pagination-color: var(--hr-primary);
+  --bs-pagination-active-bg: var(--hr-primary);
+  --bs-pagination-active-border-color: var(--hr-primary);
+}
+.table thead th { font-size: .8125rem; color: var(--hr-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .3px; white-space: nowrap; }
+
+/* 6. Бейджи статусов (заявки и сотрудники) */
+.badge.status,
+.badge-status { font-weight: 600; border-radius: 999px; padding: .35em .75em; }
+.status-pending       { background: #FFF4DE; color: var(--hr-warning); }
+.status-head_approved { background: #E3F0FA; color: var(--hr-info); }
+.status-approved      { background: #E3F4EA; color: var(--hr-success); }
+.status-rejected      { background: #FDE8E6; color: var(--hr-danger); }
+.status-active        { background: #E3F4EA; color: var(--hr-success); }
+.status-on_leave      { background: #E3F0FA; color: var(--hr-info); }
+.status-dismissed     { background: #FDE8E6; color: var(--hr-danger); }
+
+/* 7. Аватар: фото или инициалы */
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #D5DCE6; color: var(--hr-text); font-size: .75rem; font-weight: 600;
+  object-fit: cover; flex-shrink: 0;
+}
+.avatar-lg { width: 160px; height: 200px; border-radius: var(--hr-radius); font-size: 2.5rem; }
+
+/* 8. Карточка сотрудника: список «название — значение» */
+.details { display: grid; grid-template-columns: 180px 1fr; gap: .5rem 1rem; margin: 0; }
+.details dt { color: var(--hr-muted); font-weight: 400; }
+.details dd { margin: 0; }
+@media (max-width: 575.98px) {
+  .details { grid-template-columns: 1fr; gap: 0; }
+  .details dd { margin-bottom: .5rem; }
+}
+
+/* 9. Живой поиск */
+.live-search { position: relative; }
+.live-search .suggestions {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 1050;
+  max-height: 360px; overflow-y: auto; box-shadow: 0 8px 24px rgba(16, 24, 40, .12);
+}
+
+/* 10. Мобильный список сотрудников: таблица превращается в карточки */
+@media (max-width: 767.98px) {
+  .table-cards thead { display: none; }
+  .table-cards tr { display: block; padding: .75rem 1rem; border-bottom: 1px solid var(--hr-border); }
+  .table-cards td { display: block; border: 0; padding: .125rem 0 !important; }
+  .table-cards td[data-label]::before { content: attr(data-label) ": "; color: var(--hr-muted); font-size: .8125rem; }
+  .table-cards td.cell-actions { padding-top: .5rem !important; }
+}
+
+/* 11. Страница входа */
+.login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.login-card { width: 100%; max-width: 400px; }
+.login-logo {
+  width: 56px; height: 56px; border-radius: 14px; background: var(--hr-primary); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 1.25rem; margin: 0 auto 1rem;
+}
+
+/* 12. Печать отчёта: скрываем меню и кнопки */
+@media print {
+  .app-navbar, .no-print, .app-footer { display: none !important; }
+  body { background: #fff; }
+  .card { box-shadow: none; border: 0; }
+}
+
+.app-footer { color: var(--hr-muted); font-size: .8125rem; }
