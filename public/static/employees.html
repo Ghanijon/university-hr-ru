@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Сотрудники — Кадровая система</title>
+  <!-- Шрифт Inter с кириллицей (русские буквы) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Bootstrap 5.3 из CDN; integrity защищает от подмены файла -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="../assets/css/app.css" rel="stylesheet">
+</head>
+<body>
+<!-- Шапка: на узком экране меню сворачивается в кнопку-«гамбургер» -->
+<nav class="navbar navbar-expand-lg navbar-dark app-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="layout.html">ХПИ ТТУ · Кадры</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Открыть меню">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="layout.html">Главная</a></li>
+        <li class="nav-item"><a class="nav-link active" aria-current="page" href="employees.html">Сотрудники</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Кафедры</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Отпуска</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Отчёт</a></li>
+      </ul>
+      <div class="d-flex align-items-center gap-2 text-white">
+        <span>hr</span>
+        <span class="badge role-badge">Отдел кадров</span>
+        <button type="button" class="btn btn-sm btn-outline-light">Выйти</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-4">
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <h1 class="me-auto mb-0">Сотрудники</h1>
+    <a class="btn btn-primary" href="#">+ Добавить</a>
+  </div>
+
+  <!-- Форма поиска и фильтров: GET-запрос, параметры попадут в адресную строку -->
+  <form class="card card-body mb-3" method="get" action="employees.html" role="search">
+    <div class="row g-2">
+      <div class="col-12 col-md-5">
+        <label class="visually-hidden" for="q">Поиск по ФИО</label>
+        <input class="form-control" type="search" id="q" name="q" placeholder="Поиск по ФИО…">
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="visually-hidden" for="department_id">Кафедра</label>
+        <select class="form-select" id="department_id" name="department_id">
+          <option value="">Все кафедры</option>
+          <option value="1">Программирования и ИС</option>
+          <option value="2">Сетей связи и систем коммутации</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="visually-hidden" for="status">Статус</label>
+        <select class="form-select" id="status" name="status">
+          <option value="">Все статусы</option>
+          <option value="active">Работает</option>
+          <option value="on_leave">В отпуске</option>
+          <option value="dismissed">Уволен</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-2 d-grid"><button class="btn btn-outline-primary" type="submit">Найти</button></div>
+    </div>
+  </form>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle table-cards">
+        <thead>
+          <tr><th scope="col">ФИО</th><th scope="col">Кафедра</th><th scope="col">Должность</th><th scope="col">Статус</th><th scope="col"><span class="visually-hidden">Действия</span></th></tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td data-label="ФИО"><div class="d-flex align-items-center gap-2"><span class="avatar">РФ</span><a href="employee.html">Рахимов Фарход Джамшедович</a></div></td>
+          <td data-label="Кафедра">Кафедра программирования и информационных систем</td>
+          <td data-label="Должность">Старший преподаватель</td>
+          <td data-label="Статус"><span class="badge status status-active">Работает</span></td>
+          <td class="text-end cell-actions"><a class="btn btn-sm btn-outline-primary" href="employee.html">Открыть</a></td>
+        </tr>
+        <tr>
+          <td data-label="ФИО"><div class="d-flex align-items-center gap-2"><span class="avatar">ХМ</span><a href="employee.html">Хамидова Мунира Рахматовна</a></div></td>
+          <td data-label="Кафедра">Кафедра программирования и информационных систем</td>
+          <td data-label="Должность">Доцент</td>
+          <td data-label="Статус"><span class="badge status status-active">Работает</span></td>
+          <td class="text-end cell-actions"><a class="btn btn-sm btn-outline-primary" href="employee.html">Открыть</a></td>
+        </tr>
+        <tr>
+          <td data-label="ФИО"><div class="d-flex align-items-center gap-2"><span class="avatar">НМ</span><a href="employee.html">Назарова Мавджуда Тохировна</a></div></td>
+          <td data-label="Кафедра">Кафедра высшей математики и физики</td>
+          <td data-label="Должность">Преподаватель</td>
+          <td data-label="Статус"><span class="badge status status-on_leave">В отпуске</span></td>
+          <td class="text-end cell-actions"><a class="btn btn-sm btn-outline-primary" href="employee.html">Открыть</a></td>
+        </tr>
+        <tr>
+          <td data-label="ФИО"><div class="d-flex align-items-center gap-2"><span class="avatar">КГ</span><a href="employee.html">Кодиров Гайрат Олимович</a></div></td>
+          <td data-label="Кафедра">Кафедра программирования и информационных систем</td>
+          <td data-label="Должность">Преподаватель</td>
+          <td data-label="Статус"><span class="badge status status-active">Работает</span></td>
+          <td class="text-end cell-actions"><a class="btn btn-sm btn-outline-primary" href="employee.html">Открыть</a></td>
+        </tr>
+        <tr>
+          <td data-label="ФИО"><div class="d-flex align-items-center gap-2"><span class="avatar">МШ</span><a href="employee.html">Мансуров Шухрат Иззатуллоевич</a></div></td>
+          <td data-label="Кафедра">Кафедра технологии машиностроения</td>
+          <td data-label="Должность">Старший лаборант</td>
+          <td data-label="Статус"><span class="badge status status-dismissed">Уволен</span></td>
+          <td class="text-end cell-actions"><a class="btn btn-sm btn-outline-primary" href="employee.html">Открыть</a></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <nav class="mt-3 d-flex flex-column align-items-center gap-1" aria-label="Страницы">
+    <ul class="pagination mb-0">
+      <li class="page-item disabled"><span class="page-link">‹</span></li>
+      <li class="page-item active" aria-current="page"><span class="page-link">1</span></li>
+      <li class="page-item"><a class="page-link" href="#">2</a></li>
+      <li class="page-item"><a class="page-link" href="#">3</a></li>
+      <li class="page-item"><a class="page-link" href="#">›</a></li>
+    </ul>
+    <small class="text-muted">Найдено: 46</small>
+  </nav>
+</main>
+
+<footer class="app-footer container py-4 text-center">
+  © 2026 Учебный проект university-hr · все данные вымышлены
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

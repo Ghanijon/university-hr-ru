@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Рахимов Фарход — Кадровая система</title>
+  <!-- Шрифт Inter с кириллицей (русские буквы) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Bootstrap 5.3 из CDN; integrity защищает от подмены файла -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="../assets/css/app.css" rel="stylesheet">
+</head>
+<body>
+<!-- Шапка: на узком экране меню сворачивается в кнопку-«гамбургер» -->
+<nav class="navbar navbar-expand-lg navbar-dark app-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="layout.html">ХПИ ТТУ · Кадры</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Открыть меню">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="layout.html">Главная</a></li>
+        <li class="nav-item"><a class="nav-link active" aria-current="page" href="employees.html">Сотрудники</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Кафедры</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Отпуска</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Отчёт</a></li>
+      </ul>
+      <div class="d-flex align-items-center gap-2 text-white">
+        <span>hr</span>
+        <span class="badge role-badge">Отдел кадров</span>
+        <button type="button" class="btn btn-sm btn-outline-light">Выйти</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-4">
+  <nav aria-label="Навигационная цепочка">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="employees.html">Сотрудники</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Рахимов Фарход Джамшедович</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+    <!-- Левая колонка: фото и статус -->
+    <aside class="col-12 col-lg-3">
+      <div class="card"><div class="card-body text-center">
+        <span class="avatar avatar-lg mx-auto mb-3" role="img" aria-label="Фото отсутствует">РФ</span>
+        <h2 class="h3">Рахимов Фарход Джамшедович</h2>
+        <span class="badge status status-active">Работает</span>
+      </div></div>
+    </aside>
+
+    <!-- Правая колонка: данные -->
+    <section class="col-12 col-lg-9">
+      <div class="card mb-4">
+        <div class="card-header">Служебные данные</div>
+        <div class="card-body">
+          <dl class="details">
+            <dt>Кафедра</dt><dd>Кафедра программирования и информационных систем</dd>
+            <dt>Факультет</dt><dd>Факультет информационных технологий и коммуникаций</dd>
+            <dt>Должность</dt><dd>Старший преподаватель</dd>
+            <dt>Учёная степень</dt><dd>Нет</dd>
+            <dt>Дата приёма</dt><dd>01.09.2014</dd>
+          </dl>
+        </div>
+      </div>
+      <div class="card mb-4">
+        <div class="card-header">Личные данные</div>
+        <div class="card-body">
+          <dl class="details">
+            <dt>Дата рождения</dt><dd>21.06.1990</dd>
+            <dt>Пол</dt><dd>Мужской</dd>
+            <dt>Телефон</dt><dd><a href="tel:+992927011102">+992 92 701 11 02</a></dd>
+            <dt>E-mail</dt><dd><a href="mailto:f.rahimov@example.tj">f.rahimov@example.tj</a></dd>
+          </dl>
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <a class="btn btn-primary" href="#">Редактировать</a>
+        <button class="btn btn-outline-danger" type="button">Удалить</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="app-footer container py-4 text-center">
+  © 2026 Учебный проект university-hr · все данные вымышлены
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
