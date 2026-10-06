@@ -83,17 +83,40 @@
         </div>
       </div>
       <div class="d-flex gap-2">
-        <a class="btn btn-primary" href="#">Редактировать</a>
-        <button class="btn btn-outline-danger" type="button">Удалить</button>
+        <a class="btn btn-primary" href="employee-form.html">Редактировать</a>
+        <button class="btn btn-outline-danger" type="button" data-delete-url="/employees/2/delete"
+                data-employee-name="Рахимов Фарход Джамшедович">Удалить</button>
       </div>
     </section>
   </div>
 </main>
+
+<!-- Модальное подтверждение удаления: app.js подставляет адрес из data-delete-url и имя сотрудника -->
+<div class="modal fade" id="confirm-delete-modal" tabindex="-1" aria-labelledby="confirm-delete-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title h3" id="confirm-delete-title">Удалить сотрудника?</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">Сотрудник <strong id="confirm-delete-name"></strong> будет удалён. Действие нельзя отменить.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+        <form id="confirm-delete-form" method="post" action="#">
+          <button type="submit" class="btn btn-danger">Удалить</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
 <footer class="app-footer container py-4 text-center">
   © 2026 Учебный проект university-hr · все данные вымышлены
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script type="module" src="../assets/js/app.js"></script>
 </body>
 </html>

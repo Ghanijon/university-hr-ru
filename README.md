@@ -30,5 +30,6 @@ git checkout main       # вернуться к последней версии
 | day-08 | `docs/08-technical-specification.md` — полное ТЗ по мотивам ГОСТ 34.602 |
 | day-09 | `docs/09-design/` — UI-kit и статичные HTML-вайрфреймы (замена Figma-файла) |
 | day-10 | `public/static/*.html` — статическая вёрстка (layout, список, карточка), `public/assets/css/app.css` |
+| day-11 | `public/assets/js/app.js` — валидация форм, живой поиск (на моковых данных), модальное окно; `static/employee-form.html` |
 
 Остальные дни будут добавлены по ходу курса.

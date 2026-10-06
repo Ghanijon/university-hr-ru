@@ -49,8 +49,9 @@
   <form class="card card-body mb-3" method="get" action="employees.html" role="search">
     <div class="row g-2">
       <div class="col-12 col-md-5">
-        <label class="visually-hidden" for="q">Поиск по ФИО</label>
-        <input class="form-control" type="search" id="q" name="q" placeholder="Поиск по ФИО…">
+        <label class="visually-hidden" for="employee-search">Поиск по ФИО</label>
+        <!-- День 11: живой поиск обращается к временной заглушке public/api/employees/index.php -->
+        <input class="form-control" type="search" id="employee-search" name="q" placeholder="Поиск по ФИО…" autocomplete="off">
       </div>
       <div class="col-6 col-md-3">
         <label class="visually-hidden" for="department_id">Кафедра</label>
@@ -72,48 +73,80 @@
       <div class="col-12 col-md-2 d-grid"><button class="btn btn-outline-primary" type="submit">Найти</button></div>
     </div>
   </form>
+  <p id="employee-search-status" class="small text-muted" aria-live="polite"></p>
 
   <div class="card">
     <div class="table-responsive">
       <table class="table table-hover align-middle table-cards">
         <thead>
-          <tr><th scope="col">ФИО</th><th scope="col">Кафедра</th><th scope="col">Должность</th><th scope="col">Статус</th><th scope="col"><span class="visually-hidden">Действия</span></th></tr>
+          <tr>
+            <th scope="col">ФИО</th><th scope="col">Кафедра</th>
+            <th scope="col" class="d-none d-sm-table-cell">Должность</th>
+            <th scope="col" class="d-none d-md-table-cell">Телефон</th>
+            <th scope="col" class="d-none d-lg-table-cell">Дата приёма</th>
+            <th scope="col">Статус</th><th scope="col"><span class="visually-hidden">Действия</span></th>
+          </tr>
         </thead>
-        <tbody>
+        <tbody id="employees-tbody">
         <tr>
           <td data-label="ФИО"><div class="d-flex align-items-center gap-2"><span class="avatar">РФ</span><a href="employee.html">Рахимов Фарход Джамшедович</a></div></td>
           <td data-label="Кафедра">Кафедра программирования и информационных систем</td>
-          <td data-label="Должность">Старший преподаватель</td>
-          <td data-label="Статус"><span class="badge status status-active">Работает</span></td>
-          <td class="text-end cell-actions"><a class="btn btn-sm btn-outline-primary" href="employee.html">Открыть</a></td>
+          <td data-label="Должность" class="d-none d-sm-table-cell">Старший преподаватель</td>
+          <td data-label="Телефон" class="d-none d-md-table-cell">+992 92 701 11 02</td>
+          <td data-label="Дата приёма" class="d-none d-lg-table-cell">01.09.2014</td>
+          <td data-label="Статус"><span class="badge badge-status status-active">Работает</span></td>
+          <td class="text-end text-nowrap cell-actions">
+            <a class="btn btn-sm btn-outline-secondary" href="employee-form.html">Изменить</a>
+            <button type="button" class="btn btn-sm btn-outline-danger ms-1" data-delete-url="/employees/2/delete" data-employee-name="Рахимов Фарход Джамшедович">Удалить</button>
+          </td>
         </tr>
         <tr>
           <td data-label="ФИО"><div class="d-flex align-items-center gap-2"><span class="avatar">ХМ</span><a href="employee.html">Хамидова Мунира Рахматовна</a></div></td>
           <td data-label="Кафедра">Кафедра программирования и информационных систем</td>
-          <td data-label="Должность">Доцент</td>
-          <td data-label="Статус"><span class="badge status status-active">Работает</span></td>
-          <td class="text-end cell-actions"><a class="btn btn-sm btn-outline-primary" href="employee.html">Открыть</a></td>
+          <td data-label="Должность" class="d-none d-sm-table-cell">Доцент</td>
+          <td data-label="Телефон" class="d-none d-md-table-cell">+992 92 701 11 03</td>
+          <td data-label="Дата приёма" class="d-none d-lg-table-cell">01.09.2010</td>
+          <td data-label="Статус"><span class="badge badge-status status-active">Работает</span></td>
+          <td class="text-end text-nowrap cell-actions">
+            <a class="btn btn-sm btn-outline-secondary" href="employee-form.html">Изменить</a>
+            <button type="button" class="btn btn-sm btn-outline-danger ms-1" data-delete-url="/employees/3/delete" data-employee-name="Хамидова Мунира Рахматовна">Удалить</button>
+          </td>
         </tr>
         <tr>
           <td data-label="ФИО"><div class="d-flex align-items-center gap-2"><span class="avatar">НМ</span><a href="employee.html">Назарова Мавджуда Тохировна</a></div></td>
           <td data-label="Кафедра">Кафедра высшей математики и физики</td>
-          <td data-label="Должность">Преподаватель</td>
-          <td data-label="Статус"><span class="badge status status-on_leave">В отпуске</span></td>
-          <td class="text-end cell-actions"><a class="btn btn-sm btn-outline-primary" href="employee.html">Открыть</a></td>
+          <td data-label="Должность" class="d-none d-sm-table-cell">Преподаватель</td>
+          <td data-label="Телефон" class="d-none d-md-table-cell">+992 90 703 33 04</td>
+          <td data-label="Дата приёма" class="d-none d-lg-table-cell">01.09.2020</td>
+          <td data-label="Статус"><span class="badge badge-status status-on_leave">В отпуске</span></td>
+          <td class="text-end text-nowrap cell-actions">
+            <a class="btn btn-sm btn-outline-secondary" href="employee-form.html">Изменить</a>
+            <button type="button" class="btn btn-sm btn-outline-danger ms-1" data-delete-url="/employees/14/delete" data-employee-name="Назарова Мавджуда Тохировна">Удалить</button>
+          </td>
         </tr>
         <tr>
           <td data-label="ФИО"><div class="d-flex align-items-center gap-2"><span class="avatar">КГ</span><a href="employee.html">Кодиров Гайрат Олимович</a></div></td>
           <td data-label="Кафедра">Кафедра программирования и информационных систем</td>
-          <td data-label="Должность">Преподаватель</td>
-          <td data-label="Статус"><span class="badge status status-active">Работает</span></td>
-          <td class="text-end cell-actions"><a class="btn btn-sm btn-outline-primary" href="employee.html">Открыть</a></td>
+          <td data-label="Должность" class="d-none d-sm-table-cell">Преподаватель</td>
+          <td data-label="Телефон" class="d-none d-md-table-cell">+992 92 701 11 04</td>
+          <td data-label="Дата приёма" class="d-none d-lg-table-cell">01.09.2019</td>
+          <td data-label="Статус"><span class="badge badge-status status-active">Работает</span></td>
+          <td class="text-end text-nowrap cell-actions">
+            <a class="btn btn-sm btn-outline-secondary" href="employee-form.html">Изменить</a>
+            <button type="button" class="btn btn-sm btn-outline-danger ms-1" data-delete-url="/employees/4/delete" data-employee-name="Кодиров Гайрат Олимович">Удалить</button>
+          </td>
         </tr>
         <tr>
           <td data-label="ФИО"><div class="d-flex align-items-center gap-2"><span class="avatar">МШ</span><a href="employee.html">Мансуров Шухрат Иззатуллоевич</a></div></td>
           <td data-label="Кафедра">Кафедра технологии машиностроения</td>
-          <td data-label="Должность">Старший лаборант</td>
-          <td data-label="Статус"><span class="badge status status-dismissed">Уволен</span></td>
-          <td class="text-end cell-actions"><a class="btn btn-sm btn-outline-primary" href="employee.html">Открыть</a></td>
+          <td data-label="Должность" class="d-none d-sm-table-cell">Старший лаборант</td>
+          <td data-label="Телефон" class="d-none d-md-table-cell"></td>
+          <td data-label="Дата приёма" class="d-none d-lg-table-cell">01.02.2010</td>
+          <td data-label="Статус"><span class="badge badge-status status-dismissed">Уволен</span></td>
+          <td class="text-end text-nowrap cell-actions">
+            <a class="btn btn-sm btn-outline-secondary" href="employee-form.html">Изменить</a>
+            <button type="button" class="btn btn-sm btn-outline-danger ms-1" data-delete-url="/employees/23/delete" data-employee-name="Мансуров Шухрат Иззатуллоевич">Удалить</button>
+          </td>
         </tr>
         </tbody>
       </table>
@@ -132,10 +165,32 @@
   </nav>
 </main>
 
+<!-- Модальное подтверждение удаления: app.js подставляет адрес из data-delete-url и имя сотрудника -->
+<div class="modal fade" id="confirm-delete-modal" tabindex="-1" aria-labelledby="confirm-delete-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title h3" id="confirm-delete-title">Удалить сотрудника?</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">Сотрудник <strong id="confirm-delete-name"></strong> будет удалён. Действие нельзя отменить.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+        <form id="confirm-delete-form" method="post" action="#">
+          <button type="submit" class="btn btn-danger">Удалить</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <footer class="app-footer container py-4 text-center">
   © 2026 Учебный проект university-hr · все данные вымышлены
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script type="module" src="../assets/js/app.js"></script>
 </body>
 </html>
