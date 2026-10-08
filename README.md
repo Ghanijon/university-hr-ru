@@ -31,5 +31,6 @@ git checkout main       # вернуться к последней версии
 | day-09 | `docs/09-design/` — UI-kit и статичные HTML-вайрфреймы (замена Figma-файла) |
 | day-10 | `public/static/*.html` — статическая вёрстка (layout, список, карточка), `public/assets/css/app.css` |
 | day-11 | `public/assets/js/app.js` — валидация форм, живой поиск (на моковых данных), модальное окно; `static/employee-form.html` |
+| day-12 | Composer (PSR-4), `public/index.php`, `Router`, `View`, шаблоны `views/`; страницы открываются по маршрутам (данные пока заглушки) |
 
 Остальные дни будут добавлены по ходу курса.
