@@ -1,0 +1,18 @@
+# Зависимости Composer — устанавливаются командой composer install
+/vendor/
+
+# Настройки с паролями не храним в Git
+/config/config.php
+.env
+
+# Загруженные фото сотрудников (оставляем только .gitkeep, чтобы папка существовала)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# Служебные файлы
+.phpunit.cache/
+.phpunit.result.cache
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
