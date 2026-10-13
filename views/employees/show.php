@@ -61,6 +61,10 @@ $fullName = trim($e['last_name'] . ' ' . $e['first_name'] . ' ' . ($e['middle_na
     <?php if ($canEdit): ?>
       <div class="d-flex gap-2 mb-4 no-print">
         <a class="btn btn-primary" href="<?= $this->url('/employees/' . (int) $e['id'] . '/edit') ?>">Редактировать</a>
+        <!-- Удаление подтверждается в модальном окне #confirm-delete-modal (app.js) -->
+        <button class="btn btn-outline-danger" type="button"
+                data-delete-url="<?= $this->url('/employees/' . (int) $e['id'] . '/delete') ?>"
+                data-employee-name="<?= $this->e($fullName) ?>">Удалить</button>
       </div>
     <?php endif; ?>
   </section>

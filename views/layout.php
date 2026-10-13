@@ -24,6 +24,7 @@ $active = $active ?? '';
 <?= $this->partial('nav', ['active' => $active]) ?>
 
 <main class="container py-4">
+  <?= $this->partial('notice', ['notice' => $notice ?? null]) ?>
   <?= $content ?>
 </main>
 
