@@ -4,6 +4,7 @@ $items = [
     'dashboard'   => ['/', 'Главная'],
     'employees'   => ['/employees', 'Сотрудники'],
     'departments' => ['/departments', 'Кафедры'],
+    'reports'     => ['/reports/staff', 'Отчёт'],
 ];
 ?>
 <nav class="navbar navbar-expand-lg navbar-dark app-navbar">

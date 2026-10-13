@@ -32,5 +32,6 @@ git checkout main       # вернуться к последней версии
 | day-10 | `public/static/*.html` — статическая вёрстка (layout, список, карточка), `public/assets/css/app.css` |
 | day-11 | `public/assets/js/app.js` — валидация форм, живой поиск (на моковых данных), модальное окно; `static/employee-form.html` |
 | day-12 | Composer (PSR-4), `public/index.php`, `Router`, `View`, шаблоны `views/`; страницы открываются по маршрутам (данные пока заглушки) |
+| day-13 | `Database` (PDO), репозитории, CRUD сотрудников, поиск/фильтр/пагинация, JOIN, отчёт «штат по кафедрам» |
 
 Остальные дни будут добавлены по ходу курса.
