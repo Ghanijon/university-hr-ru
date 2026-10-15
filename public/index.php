@@ -11,9 +11,11 @@ use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\DepartmentController;
 use App\Controllers\EmployeeController;
+use App\Controllers\LeaveController;
 use App\Controllers\ReportController;
 use App\Core\Database;
 use App\Core\Router;
+use App\Core\Session;
 use App\Core\View;
 
 define('BASE_PATH', dirname(__DIR__));
@@ -45,6 +47,7 @@ $config = require $configFile;
 ini_set('display_errors', $config['debug'] ? '1' : '0');
 error_reporting(E_ALL);
 Database::configure($config['db']);
+Session::start();
 
 // Любое непойманное исключение → страница 500 (подробности — только в режиме debug)
 set_exception_handler(function (Throwable $e) use ($config): void {
@@ -63,6 +66,8 @@ set_exception_handler(function (Throwable $e) use ($config): void {
 $router = new Router();
 
 $router->get('/login', [AuthController::class, 'showLogin']);
+$router->post('/login', [AuthController::class, 'login']);
+$router->post('/logout', [AuthController::class, 'logout']);
 
 $router->get('/', [DashboardController::class, 'index']);
 
@@ -76,6 +81,14 @@ $router->post('/employees/{id}/delete', [EmployeeController::class, 'delete']);
 
 $router->get('/departments', [DepartmentController::class, 'index']);
 
+$router->get('/leaves', [LeaveController::class, 'index']);
+$router->get('/leaves/create', [LeaveController::class, 'create']);
+$router->post('/leaves/create', [LeaveController::class, 'store']);
+$router->post('/leaves/{id}/approve', [LeaveController::class, 'approve']);
+$router->post('/leaves/{id}/reject', [LeaveController::class, 'reject']);
+
 $router->get('/reports/staff', [ReportController::class, 'staff']);
+
+$router->get('/api/employees', [EmployeeController::class, 'apiSearch']);
 
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
