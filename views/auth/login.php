@@ -1,6 +1,7 @@
 <?php
 /**
  * Форма входа. Выводится без общего меню (layout = 'auth/layout').
+ * Тестовые логины: admin, hr, head_pis, teacher1 (пароль Secret123!)
  * @var \App\Core\View $this
  * @var string|null $error
  * @var string $username
@@ -18,6 +19,7 @@
       <?php endif; ?>
 
       <form method="post" action="<?= $this->url('/login') ?>">
+        <?= \App\Core\Csrf::field() ?>
         <div class="mb-3">
           <label class="form-label" for="username">Логин</label>
           <input class="form-control" id="username" name="username" required maxlength="50" autocomplete="username"

@@ -18,6 +18,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
         <form id="confirm-delete-form" method="post" action="">
+          <?= \App\Core\Csrf::field() ?>
           <button type="submit" class="btn btn-danger">Удалить</button>
         </form>
       </div>

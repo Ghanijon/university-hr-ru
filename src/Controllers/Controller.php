@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Auth;
+use App\Core\Csrf;
+use App\Core\Session;
 use App\Core\View;
 
 /**
@@ -51,5 +54,25 @@ abstract class Controller
             'message' => $message,
         ], $code);
         exit;
+    }
+
+    /** Сообщение, которое покажется на следующей странице после редиректа */
+    protected function flash(string $type, string $message): void
+    {
+        Session::flash($type, $message);
+    }
+
+    /** Требует вход и одну из ролей. Возвращает текущего пользователя. */
+    protected function requireRole(string ...$roles): array
+    {
+        return Auth::requireRole(...$roles);
+    }
+
+    /** Проверка CSRF-токена. Вызывайте в начале КАЖДОГО обработчика POST. */
+    protected function verifyCsrf(): void
+    {
+        if (!Csrf::verify($_POST['_csrf'] ?? null)) {
+            $this->abort(419, 'Форма устарела или отправлена с чужого сайта. Обновите страницу и повторите действие.');
+        }
     }
 }

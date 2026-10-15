@@ -6,6 +6,8 @@
  * @var string $title    заголовок вкладки браузера
  */
 $active = $active ?? '';
+$currentUser = \App\Core\Auth::user();
+$notice = $notice ?? \App\Core\Session::pullFlash();   // flash-сообщение после редиректа
 ?>
 <!doctype html>
 <html lang="ru">
@@ -21,10 +23,10 @@ $active = $active ?? '';
   <link href="<?= $this->url('/assets/css/app.css') ?>" rel="stylesheet">
 </head>
 <body>
-<?= $this->partial('nav', ['active' => $active]) ?>
+<?= $this->partial('nav', ['active' => $active, 'user' => $currentUser]) ?>
 
 <main class="container py-4">
-  <?= $this->partial('notice', ['notice' => $notice ?? null]) ?>
+  <?= $this->partial('notice', ['notice' => $notice]) ?>
   <?= $content ?>
 </main>
 
