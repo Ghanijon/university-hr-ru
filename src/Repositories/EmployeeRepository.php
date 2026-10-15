@@ -131,6 +131,38 @@ final class EmployeeRepository
         $stmt->execute([':id' => $id]);
     }
 
+    /**
+     * Короткий поиск для API живого поиска (до $limit записей).
+     * $departmentId — ограничение для заведующего кафедрой.
+     */
+    public function search(string $q, ?int $departmentId = null, int $limit = 10): array
+    {
+        [$where, $params] = $this->buildWhere(['q' => $q, 'department_id' => $departmentId]);
+        $stmt = $this->db->prepare(self::SELECT . " {$where} ORDER BY e.last_name, e.first_name LIMIT :limit");
+        foreach ($params as $name => $value) {
+            $stmt->bindValue($name, $value);
+        }
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    /** Работающие сотрудники для выпадающего списка (форма заявки у отдела кадров) */
+    public function listForSelect(): array
+    {
+        return $this->db->query("
+            SELECT id, CONCAT_WS(' ', last_name, first_name, middle_name) AS full_name
+            FROM employees WHERE status <> 'dismissed'
+            ORDER BY last_name, first_name")->fetchAll();
+    }
+
+    public function updatePhoto(int $id, ?string $path): void
+    {
+        $stmt = $this->db->prepare('UPDATE employees SET photo_path = :path WHERE id = :id');
+        $stmt->execute([':path' => $path, ':id' => $id]);
+    }
+
     /** Есть ли уже сотрудник с таким e-mail (кроме сотрудника $exceptId при редактировании) */
     public function emailExists(string $email, ?int $exceptId = null): bool
     {

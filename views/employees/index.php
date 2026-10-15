@@ -27,7 +27,7 @@
     <div class="col-6 col-md-3">
       <label class="visually-hidden" for="department_id">Кафедра</label>
       <select class="form-select" id="department_id" name="department_id">
-        <option value="">Все кафедры</option>
+        <?php if (count($departments) > 1): ?><option value="">Все кафедры</option><?php endif; ?>
         <?php foreach ($departments as $d): ?>
           <option value="<?= (int) $d['id'] ?>" <?= (string) $d['id'] === (string) $filters['department_id'] ? 'selected' : '' ?>>
             <?= $this->e($d['name']) ?>

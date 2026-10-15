@@ -24,7 +24,10 @@ $error = function (string $field) use ($errors): string {
   <div class="alert alert-danger" role="alert">Проверьте форму: найдено ошибок — <?= count($errors) ?>.</div>
 <?php endif; ?>
 
-<form class="card card-body" method="post" action="<?= $this->url($action) ?>">
+<!-- enctype="multipart/form-data" обязателен для загрузки файлов -->
+<form class="card card-body" method="post" action="<?= $this->url($action) ?>"
+      enctype="multipart/form-data">
+  <?= \App\Core\Csrf::field() ?>
   <div class="row g-3">
     <div class="col-md-4">
       <label class="form-label" for="last_name">Фамилия *</label>
@@ -123,6 +126,22 @@ $error = function (string $field) use ($errors): string {
         <?php endforeach; ?>
       </select>
       <?= $error('status') ?>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label" for="photo">Фото</label>
+      <div class="d-flex flex-wrap align-items-start gap-3">
+        <?php if (!empty($employee['photo_path'])): ?>
+          <img class="avatar avatar-lg" src="<?= $this->e($this->url('/' . $employee['photo_path'])) ?>" alt="Текущее фото">
+        <?php else: ?>
+        <?php endif; ?>
+        <div class="flex-grow-1">
+          <input class="form-control<?= $invalid('photo') ?>" type="file" id="photo" name="photo"
+                 accept="image/jpeg,image/png,image/webp">
+          <?= $error('photo') ?>
+          <div class="form-text">JPEG, PNG или WebP, не более 2 МБ<?= $id ? '. Новый файл заменит текущее фото' : '' ?></div>
+        </div>
+      </div>
     </div>
   </div>
 

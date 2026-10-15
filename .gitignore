@@ -8,6 +8,7 @@
 # Загруженные фото сотрудников (оставляем только .gitkeep, чтобы папка существовала)
 /public/uploads/*
 !/public/uploads/.gitkeep
+!/public/uploads/.htaccess
 
 # Служебные файлы
 .phpunit.cache/

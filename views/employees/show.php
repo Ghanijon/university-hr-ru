@@ -67,5 +67,28 @@ $fullName = trim($e['last_name'] . ' ' . $e['first_name'] . ' ' . ($e['middle_na
                 data-employee-name="<?= $this->e($fullName) ?>">Удалить</button>
       </div>
     <?php endif; ?>
+
+    <div class="card">
+      <div class="card-header">Заявки на отпуск</div>
+      <?php if ($leaves === []): ?>
+        <div class="card-body text-muted">Заявок нет</div>
+      <?php else: ?>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead><tr><th scope="col">Тип</th><th scope="col">Период</th><th scope="col" class="text-end">Дней</th><th scope="col">Статус</th></tr></thead>
+            <tbody>
+              <?php foreach ($leaves as $l): ?>
+                <tr>
+                  <td><?= $this->e($this->label('leave_type', $l['type'])) ?></td>
+                  <td class="text-nowrap"><?= $this->date($l['start_date']) ?> – <?= $this->date($l['end_date']) ?></td>
+                  <td class="text-end"><?= (int) $l['days'] ?></td>
+                  <td><span class="badge status status-<?= $this->e($l['status']) ?>"><?= $this->e($this->label('leave_status', $l['status'])) ?></span></td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+      <?php endif; ?>
+    </div>
   </section>
 </div>

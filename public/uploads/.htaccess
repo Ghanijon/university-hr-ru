@@ -1,0 +1,8 @@
+# Apache (XAMPP): в папке загрузок скрипты не выполняются,
+# даже если злоумышленнику удастся загрузить файл .php
+<FilesMatch "\.(php|phtml|phar|php\d)$">
+  Require all denied
+</FilesMatch>
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
