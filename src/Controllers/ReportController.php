@@ -11,6 +11,8 @@ final class ReportController extends Controller
     /** GET /reports/staff — отчёт «штат по кафедрам» */
     public function staff(): void
     {
+        $this->requireRole('admin', 'hr', 'head');
+
         $rows = (new DepartmentRepository())->staffReport();
 
         // Итоговая строка считается в PHP, чтобы не делать второй запрос

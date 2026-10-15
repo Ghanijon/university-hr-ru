@@ -2,22 +2,29 @@
 /**
  * Главная страница.
  * @var \App\Core\View $this
- * @var array $stats   ['active' => .., 'on_leave' => .., 'pending' => .., 'departments' => ..]
+ * @var array $user
+ * @var array $stats         [[подпись, число], ...]
+ * @var array $latestLeaves
  */
-$cards = [
-    ['active', 'Работают'],
-    ['on_leave', 'В отпуске'],
-    ['pending', 'Заявки ждут решения'],
-    ['departments', 'Кафедр'],
-];
+$greeting = $user['full_name'] ?: $user['username'];
+$cols = count($stats) === 4 ? 'col-xl-3' : 'col-xl-4';
 ?>
-<h1 class="mb-4">Главная</h1>
+<div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+  <div class="me-auto">
+    <h1 class="mb-0">Добро пожаловать, <?= $this->e($greeting) ?></h1>
+    <p class="text-muted mb-0"><?= $this->e($this->label('role', $user['role'])) ?> · <?= date('d.m.Y') ?></p>
+  </div>
+  <a class="btn btn-outline-primary" href="<?= $this->url('/leaves/create') ?>">Подать заявку на отпуск</a>
+  <?php if (in_array($user['role'], ['admin', 'hr'], true)): ?>
+    <a class="btn btn-primary" href="<?= $this->url('/employees/create') ?>">+ Новый сотрудник</a>
+  <?php endif; ?>
+</div>
 
 <div class="row g-3 mb-4">
-  <?php foreach ($cards as [$key, $label]): ?>
-    <div class="col-12 col-sm-6 col-xl-3">
+  <?php foreach ($stats as [$label, $number]): ?>
+    <div class="col-12 col-sm-6 <?= $cols ?>">
       <div class="card stat-card h-100"><div class="card-body">
-        <div class="stat-number"><?= (int) ($stats[$key] ?? 0) ?></div>
+        <div class="stat-number"><?= (int) $number ?></div>
         <div class="stat-label"><?= $this->e($label) ?></div>
       </div></div>
     </div>
@@ -25,7 +32,10 @@ $cards = [
 </div>
 
 <section class="card">
-  <div class="card-header">Последние заявки на отпуск</div>
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span><?= $user['role'] === 'employee' ? 'Мои заявки на отпуск' : 'Последние заявки на отпуск' ?></span>
+    <a class="small" href="<?= $this->url('/leaves') ?>">Все заявки →</a>
+  </div>
   <div class="table-responsive">
     <table class="table table-hover align-middle">
       <thead>

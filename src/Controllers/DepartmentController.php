@@ -12,6 +12,8 @@ final class DepartmentController extends Controller
     /** GET /departments — справочники кафедр и должностей */
     public function index(): void
     {
+        $this->requireRole('admin', 'hr', 'head');
+
         $this->render('departments/index', [
             'title'       => 'Кафедры',
             'active'      => 'departments',
