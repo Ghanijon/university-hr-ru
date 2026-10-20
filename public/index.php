@@ -44,6 +44,7 @@ if (!is_file($configFile)) {
 }
 $config = require $configFile;
 
+date_default_timezone_set($config['timezone'] ?? 'Asia/Dushanbe');
 ini_set('display_errors', $config['debug'] ? '1' : '0');
 error_reporting(E_ALL);
 Database::configure($config['db']);

@@ -201,9 +201,10 @@ final class LeaveRequestRepository
 
         $stmt = $this->db->prepare("
             INSERT INTO orders (number, type, employee_id, order_date, text, created_by)
-            VALUES (:number, 'leave', :employee_id, CURDATE(), :text, :created_by)");
+            VALUES (:number, 'leave', :employee_id, :order_date, :text, :created_by)");
         $stmt->execute([
             ':number'      => sprintf('ОТ-%s-%04d', date('Y'), $leaveId),
+            ':order_date'  => date('Y-m-d'),
             ':employee_id' => $leave['employee_id'],
             ':text'        => $text,
             ':created_by'  => $userId,

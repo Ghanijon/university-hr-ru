@@ -33,6 +33,9 @@ final class Database
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,       // строки как ассоциативные массивы
                 PDO::ATTR_EMULATE_PREPARES   => false,                  // настоящие prepared statements
             ]);
+            // Часовой пояс соединения = часовой пояс PHP, иначе NOW() и CURDATE() в MySQL
+            // вернут время сервера БД (часто UTC), а не время Душанбе
+            self::$pdo->exec("SET time_zone = '" . date('P') . "'");
         }
 
         return self::$pdo;
