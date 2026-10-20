@@ -47,7 +47,7 @@ abstract class Controller
     /** Страница ошибки (403, 404, 419) и завершение скрипта */
     protected function abort(int $code, string $message = ''): never
     {
-        $titles = [403 => 'Доступ запрещён', 404 => 'Не найдено', 419 => 'Сессия устарела'];
+        $titles = [403 => 'Доступ запрещён', 404 => 'Не найдено', 413 => 'Слишком большой запрос', 419 => 'Сессия устарела'];
         $this->render('errors/error', [
             'title'   => $titles[$code] ?? 'Ошибка',
             'code'    => $code,
@@ -71,6 +71,12 @@ abstract class Controller
     /** Проверка CSRF-токена. Вызывайте в начале КАЖДОГО обработчика POST. */
     protected function verifyCsrf(): void
     {
+        // Если запрос больше post_max_size (php.ini), PHP молча отбрасывает ВСЕ данные формы:
+        // $_POST и $_FILES пустые, токена нет. Это не подделка запроса — сообщаем честно.
+        if ($_POST === [] && $_FILES === [] && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) {
+            $this->abort(413, 'Отправленные данные слишком велики (максимум ' . ini_get('post_max_size')
+                . '). Вернитесь назад и выберите фото не больше 2 МБ.');
+        }
         if (!Csrf::verify($_POST['_csrf'] ?? null)) {
             $this->abort(419, 'Форма устарела или отправлена с чужого сайта. Обновите страницу и повторите действие.');
         }
