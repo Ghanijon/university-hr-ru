@@ -34,5 +34,6 @@ git checkout main       # вернуться к последней версии
 | day-12 | Composer (PSR-4), `public/index.php`, `Router`, `View`, шаблоны `views/`; страницы открываются по маршрутам (данные пока заглушки) |
 | day-13 | `Database` (PDO), репозитории, CRUD сотрудников, поиск/фильтр/пагинация, JOIN, отчёт «штат по кафедрам» |
 | day-14 | `Auth`, роли, `Session`, `Csrf`, загрузка фото, заявки на отпуск + согласование, `/api/employees` |
+| day-15 | `tests/` (PHPUnit: ValidatorTest, LeaveRequestRulesTest), `docs/15-test-cases.md`, исправления (коммиты `fix: …`) |
 
 Остальные дни будут добавлены по ходу курса.
