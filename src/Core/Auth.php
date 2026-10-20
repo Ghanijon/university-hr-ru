@@ -29,7 +29,7 @@ final class Auth
         $hash = $user['password_hash'] ?? self::DUMMY_HASH;
         $passwordOk = password_verify($password, $hash);
 
-        if ($user === null || !$passwordOk || !(int) $user['is_active']) {
+        if ($user === null || !$passwordOk || !self::isUsable($user)) {
             return false;
         }
 
@@ -61,12 +61,29 @@ final class Auth
         }
 
         $user = (new UserRepository())->find($id);
-        if ($user === null || !(int) $user['is_active']) {
+        if ($user === null || !self::isUsable($user)) {
             Session::remove(self::SESSION_KEY);
             return null;
         }
 
         return self::$user = $user;
+    }
+
+    /**
+     * Учётная запись активна и, для ролей head и employee, связана с карточкой сотрудника.
+     * Без карточки неизвестны кафедра и «свои» заявки — такой пользователь не должен работать,
+     * иначе фильтры по кафедре и сотруднику не применятся и он увидит чужие данные.
+     */
+    private static function isUsable(array $user): bool
+    {
+        if (!(int) $user['is_active']) {
+            return false;
+        }
+        if (in_array($user['role'], ['head', 'employee'], true)) {
+            return !empty($user['employee_id']) && !empty($user['department_id']);
+        }
+
+        return true;
     }
 
     public static function check(): bool

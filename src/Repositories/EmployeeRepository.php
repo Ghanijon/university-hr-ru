@@ -82,7 +82,8 @@ final class EmployeeRepository
             $conditions[] = "CONCAT_WS(' ', e.last_name, e.first_name, e.middle_name) LIKE :q";
             $params[':q'] = '%' . addcslashes($q, '%_\\') . '%';
         }
-        if (!empty($filters['department_id'])) {
+        // null и '' — «все кафедры»; любое другое значение (даже 0) — фильтр
+        if (isset($filters['department_id']) && $filters['department_id'] !== '') {
             $conditions[] = 'e.department_id = :department_id';
             $params[':department_id'] = (int) $filters['department_id'];
         }

@@ -59,11 +59,13 @@ final class LeaveRequestRepository
     {
         $conditions = [];
         $params = [];
-        if (!empty($filters['employee_id'])) {
+        // array_key_exists, а не empty(): фильтр employee_id = 0 должен вернуть 0 строк,
+        // а не «все заявки» (иначе пользователь без карточки увидит чужие данные)
+        if (array_key_exists('employee_id', $filters)) {
             $conditions[] = 'lr.employee_id = :employee_id';
             $params[':employee_id'] = (int) $filters['employee_id'];
         }
-        if (!empty($filters['department_id'])) {
+        if (array_key_exists('department_id', $filters)) {
             $conditions[] = 'e.department_id = :department_id';
             $params[':department_id'] = (int) $filters['department_id'];
         }
