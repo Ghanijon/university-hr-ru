@@ -4,6 +4,10 @@
 
 /* ---------- 1. Общие утилиты ---------- */
 
+// Базовый путь приложения: '' для php -S и VDS, '/university-hr/public' в XAMPP.
+// Шаблон layout.php пишет его в <html data-base-url="...">; на статичных страницах атрибута нет.
+const BASE_URL = document.documentElement.dataset.baseUrl ?? '';
+
 // Откладывает вызов fn, пока пользователь не сделает паузу delay мс.
 function debounce(fn, delay = 300) {
   let timerId;
@@ -129,7 +133,7 @@ function createEmployeeRow(employee) {
 
   const nameCell = document.createElement('td');
   const link = document.createElement('a');
-  link.href = `/employees/${encodeURIComponent(employee.id)}`;
+  link.href = `${BASE_URL}/employees/${encodeURIComponent(employee.id)}`;
   link.textContent = employee.full_name;
   nameCell.append(link);
 
@@ -144,12 +148,12 @@ function createEmployeeRow(employee) {
   actionsCell.className = 'text-end text-nowrap';
   const editLink = document.createElement('a');
   editLink.className = 'btn btn-sm btn-outline-secondary';
-  editLink.href = `/employees/${encodeURIComponent(employee.id)}/edit`;
+  editLink.href = `${BASE_URL}/employees/${encodeURIComponent(employee.id)}/edit`;
   editLink.textContent = 'Изменить';
   const deleteButton = document.createElement('button');
   deleteButton.type = 'button';
   deleteButton.className = 'btn btn-sm btn-outline-danger ms-1';
-  deleteButton.dataset.deleteUrl = `/employees/${encodeURIComponent(employee.id)}/delete`;
+  deleteButton.dataset.deleteUrl = `${BASE_URL}/employees/${encodeURIComponent(employee.id)}/delete`;
   deleteButton.dataset.employeeName = employee.full_name;
   deleteButton.textContent = 'Удалить';
   actionsCell.append(editLink, deleteButton);
@@ -195,7 +199,7 @@ function initEmployeeSearch() {
     tbody.setAttribute('aria-busy', 'true');
     setStatus('Поиск…');
     try {
-      const response = await fetch(`/api/employees?q=${encodeURIComponent(query)}`, {
+      const response = await fetch(`${BASE_URL}/api/employees?q=${encodeURIComponent(query)}`, {
         headers: { Accept: 'application/json' },
         signal: controller.signal,
       });

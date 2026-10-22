@@ -20,10 +20,14 @@ final class Session
 
         $isHttps = ($_SERVER['HTTPS'] ?? '') === 'on' || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
 
+        // XAMPP: приложение открывается и как /university-hr/, и как /university-hr/public/ —
+        // cookie должна работать для обоих адресов, поэтому «/public» в конце пути отбрасываем
+        $cookiePath = preg_replace('#/public$#', '', Router::basePath()) ?: '/';
+
         session_name('UHRSESSID');
         session_set_cookie_params([
             'lifetime' => 0,                        // до закрытия браузера
-            'path'     => Router::basePath() ?: '/',
+            'path'     => $cookiePath,
             'httponly' => true,                     // cookie недоступна из JavaScript (защита от кражи через XSS)
             'secure'   => $isHttps,                 // по HTTPS — только по защищённому каналу
             'samesite' => 'Lax',                    // не отправлять cookie в POST-запросах с чужих сайтов

@@ -99,6 +99,9 @@ final class Router
 
         if ($base !== '' && str_starts_with($path, $base)) {
             $path = substr($path, strlen($base)) ?: '/';
+        } elseif (str_ends_with($base, '/public') && str_starts_with($path, substr($base, 0, -7))) {
+            // XAMPP: http://localhost/university-hr/login — корневой .htaccess переслал запрос в public/
+            $path = substr($path, strlen($base) - 7) ?: '/';
         }
 
         return $path === '/' ? '/' : rtrim($path, '/');
