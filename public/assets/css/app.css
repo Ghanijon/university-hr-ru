@@ -86,6 +86,11 @@ h3, .h3 { font-size: 1.125rem; font-weight: 600; }
   --bs-pagination-active-bg: var(--hr-primary);
   --bs-pagination-active-border-color: var(--hr-primary);
 }
+.nav-pills {
+  --bs-nav-link-color: var(--hr-primary);
+  --bs-nav-link-hover-color: var(--hr-primary-dark);
+  --bs-nav-pills-link-active-bg: var(--hr-primary);
+}
 .table thead th { font-size: .8125rem; color: var(--hr-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .3px; white-space: nowrap; }
 
 /* 6. Бейджи статусов (заявки и сотрудники) */
@@ -130,6 +135,7 @@ h3, .h3 { font-size: 1.125rem; font-weight: 600; }
   .table-cards tr { display: block; padding: .75rem 1rem; border-bottom: 1px solid var(--hr-border); }
   .table-cards td { display: block; border: 0; padding: .125rem 0 !important; }
   .table-cards td[data-label]::before { content: attr(data-label) ": "; color: var(--hr-muted); font-size: .8125rem; }
+  .table-cards td[data-label="ФИО"]::before { content: none; }   /* ФИО и так видно по ссылке */
   .table-cards td.cell-actions { padding-top: .5rem !important; }
 }
 
