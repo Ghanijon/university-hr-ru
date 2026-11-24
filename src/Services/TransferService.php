@@ -85,7 +85,7 @@ final class TransferService
             . ($employee['middle_name'] ? ' ' . mb_substr($employee['middle_name'], 0, 1) . '.' : '');
 
         return sprintf(
-            'Перевести: %s. Новое место работы: %s, должность «%s», с %s.',
+            'Перевести: %s Новое место работы: %s, должность «%s», с %s.',
             $name,
             $employee['department_name'],
             $employee['position_title'],
