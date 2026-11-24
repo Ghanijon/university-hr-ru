@@ -17,6 +17,7 @@
 - Заявки на отпуск с двухуровневым согласованием: **pending → head_approved → approved / rejected**;
   при утверждении автоматически создаётся приказ.
 - Отчёт «Штат по кафедрам» (с версией для печати).
+- REST API v1 с Bearer-токенами, описание — Swagger UI `/api/docs.html`.
 - Живой поиск сотрудников через JSON API `/api/employees?q=`.
 - Безопасность: `password_hash`, prepared statements (PDO), экранирование вывода, CSRF-токены,
   проверка ролей, безопасная загрузка файлов.
@@ -45,18 +46,125 @@ Bootstrap 5.3 (CDN) · ванильный JavaScript · Composer (PSR-4, PHPUnit
 Настройки по умолчанию (`config/config.example.php`) подходят для XAMPP: `root` без пароля, база `university_hr`.
 Если у вас другие параметры — скопируйте файл в `config/config.php` и измените его.
 
-### Вариант 2. Встроенный сервер PHP (Linux, macOS, Windows)
+### Вариант 2. Встроенный сервер PHP (macOS, Linux, Windows)
+
+**1. Установите программы:** PHP 8.2+ (расширения `pdo_mysql`, `mbstring`, `fileinfo`), Composer, MySQL 8 или MariaDB 10.6+.
 
 ```bash
-git clone <адрес репозитория> university-hr && cd university-hr
-composer install
-mysql -u root -p < database/schema.sql
-mysql -u root -p university_hr < database/seed.sql
-cp config/config.example.php config/config.php   # укажите пользователя и пароль MySQL
-php -S localhost:8000 -t public
+brew install php composer mysql && brew services start mysql                 # macOS
+sudo apt install php-cli php-mysql php-mbstring php-xml composer mysql-server   # Ubuntu
+php -v && php -m | grep pdo_mysql                                            # проверка
 ```
 
-Откройте **http://localhost:8000**.
+Windows: XAMPP (PHP и MySQL) и Composer с getcomposer.org.
+
+**2. Скачайте проект.** Репозиторий приватный: нужен доступ и вход в GitHub (`gh auth login`).
+
+```bash
+git clone https://github.com/Ghanijon/university-hr-ru.git university-hr
+cd university-hr
+git switch live/2026-11-api      # версия с REST API и Swagger
+composer install
+```
+
+**3. Создайте базу и пользователя.** Войдите в MySQL как администратор: `mysql -u root`
+(если у root есть пароль — `mysql -u root -p`, в Ubuntu — `sudo mysql`) и выполните:
+
+```sql
+CREATE DATABASE university_hr CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'hr_demo'@'localhost' IDENTIFIED BY 'hr_demo_pass';
+CREATE USER 'hr_demo'@'127.0.0.1' IDENTIFIED BY 'hr_demo_pass';
+GRANT ALL PRIVILEGES ON university_hr.* TO 'hr_demo'@'localhost';
+GRANT ALL PRIVILEGES ON university_hr.* TO 'hr_demo'@'127.0.0.1';
+```
+
+**4. Загрузите дамп** (структура и тестовые данные; пароль `hr_demo_pass`):
+
+```bash
+mysql -h 127.0.0.1 -u hr_demo -p university_hr < database/dump.sql
+```
+
+В Windows PowerShell нет `<`: выполняйте команду в `cmd` или импортируйте файл через phpMyAdmin.
+
+**5. Настройте подключение:**
+
+```bash
+cp config/config.example.php config/config.php      # Windows: copy config\config.example.php config\config.php
+```
+
+В `config/config.php` укажите в разделе `db`: пользователь `hr_demo`, пароль `hr_demo_pass`
+(см. «Строки подключения»). Этот файл в Git не попадает.
+
+**6. Запустите:**
+
+```bash
+php -S localhost:8081 -t public
+```
+
+- приложение: **http://localhost:8081**
+- Swagger: **http://localhost:8081/api/docs.html** (нужен интернет)
+
+### Строки подключения к базе
+
+| Параметр | Значение для учебного стенда |
+|---|---|
+| Сервер и порт | `127.0.0.1:3306` |
+| База | `university_hr` |
+| Пользователь / пароль | `hr_demo` / `hr_demo_pass` |
+| Кодировка | `utf8mb4` |
+
+> Это пароль **только для локальной учебной базы**. На сервере задайте другой, в Git его не сохраняйте.
+
+PDO (PHP):
+
+```php
+new PDO('mysql:host=127.0.0.1;port=3306;dbname=university_hr;charset=utf8mb4', 'hr_demo', 'hr_demo_pass');
+```
+
+`config/config.php`:
+
+```php
+'db' => [
+    'host' => '127.0.0.1', 'port' => 3306, 'name' => 'university_hr',
+    'user' => 'hr_demo',   'pass' => 'hr_demo_pass',
+],
+```
+
+Переменные окружения вместо `config.php` (их читает `config.example.php`):
+
+```bash
+DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=university_hr DB_USER=hr_demo DB_PASS=hr_demo_pass php -S localhost:8081 -t public
+```
+
+| Клиент | Строка |
+|---|---|
+| Терминал | `mysql -h 127.0.0.1 -P 3306 -u hr_demo -p university_hr` |
+| URI (TablePlus и др.) | `mysql://hr_demo:hr_demo_pass@127.0.0.1:3306/university_hr` |
+| JDBC (DBeaver, DataGrip) | `jdbc:mysql://127.0.0.1:3306/university_hr?characterEncoding=UTF-8` |
+
+### Дамп базы
+
+```bash
+# восстановить исходные данные (таблицы будут заменены)
+mysql -h 127.0.0.1 -u hr_demo -p university_hr < database/dump.sql
+
+# сделать новый дамп; токены API не выгружаем
+mysqldump -h 127.0.0.1 -u hr_demo -p --single-transaction --no-tablespaces --ignore-table=university_hr.api_tokens university_hr > backup.sql
+```
+
+Другой способ: `database/schema.sql` + `database/seed.sql`. Внимание: `schema.sql` удаляет базу и создаёт её заново,
+для этого нужны права администратора.
+
+### Если не работает
+
+| Сообщение | Что делать |
+|---|---|
+| `could not find driver` | Включите расширение `pdo_mysql` в PHP |
+| `Access denied for user` | Повторите шаг 3, проверьте `config/config.php` |
+| `Connection refused` | MySQL не запущен: `brew services start mysql` / `sudo systemctl start mysql` |
+| `Unknown database` | База не создана (шаг 3) |
+| `Table ... doesn't exist` | Не загружен дамп (шаг 4) |
+| `Address already in use` | Порт занят: запустите на другом, например `localhost:8090` |
 
 ### Тестовые логины
 
@@ -99,7 +207,7 @@ university-hr/
   README.md
   composer.json, phpunit.xml, .htaccess (XAMPP: перенаправление в public/)
   config/config.example.php        настройки (config.php — в .gitignore)
-  database/                        schema.sql, seed.sql, queries.sql
+  database/                        schema.sql, seed.sql, queries.sql, dump.sql (полный дамп)
   deploy/nginx.conf                конфигурация Nginx + PHP-FPM
   docs/                            документация дней 1–9, 15, 16 (Markdown + PlantUML)
   public/                          DocumentRoot
@@ -153,10 +261,12 @@ plantuml.com или команда `plantuml -tpng docs/04-behavior/*.puml`.
 
 ```bash
 composer install
-vendor/bin/phpunit        # или: composer test
+DB_NAME=university_hr vendor/bin/phpunit
+tests/api_smoke.sh http://localhost:8081     # сервер должен быть запущен; добавляет записи в базу
 ```
 
-49 модульных тестов: проверка полей формы (`Validator`) и правила заявки на отпуск (`LeaveRequestRules`).
+75 тестов: поля формы, правила заявки на отпуск, безопасная сборка SQL и откат транзакции перевода
+(последний без базы пропускается).
 Ручные тест-кейсы и баг-репорты — `docs/15-test-cases.md`.
 
 ## Публикация
