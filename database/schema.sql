@@ -105,6 +105,23 @@ CREATE TABLE users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------
+-- Токены REST API. Сам токен в базе НЕ хранится — только его SHA-256:
+-- если базу украдут, по хешу войти в API нельзя.
+-- ---------------------------------------------------------------------
+CREATE TABLE api_tokens (
+  id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id    INT UNSIGNED NOT NULL,
+  token_hash CHAR(64)     NOT NULL,             -- SHA-256 в шестнадцатеричном виде: 64 символа
+  expires_at DATETIME     NOT NULL,
+  created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_api_tokens_hash (token_hash),   -- поиск токена при каждом запросе — по индексу
+  CONSTRAINT fk_api_tokens_user
+    FOREIGN KEY (user_id) REFERENCES users (id)
+    ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
 -- Кадровые приказы
 -- ---------------------------------------------------------------------
 CREATE TABLE orders (

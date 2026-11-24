@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Core\Database;
+use App\Core\Sql;
 use PDO;
 
 /**
@@ -32,6 +33,24 @@ final class EmployeeRepository
         JOIN faculties   f ON f.id = d.faculty_id
         JOIN positions   p ON p.id = e.position_id';
 
+    /**
+     * Белый список сортировки: что можно написать в ?sort= → выражение SQL.
+     * ORDER BY нельзя передать параметром: подготовленный запрос подставляет ЗНАЧЕНИЯ,
+     * а имя столбца — часть текста SQL. ORDER BY :sort сортировал бы по строке-константе
+     * 'hire_date', то есть никак. Поэтому берём готовый SQL из этого списка.
+     */
+    public const SORTS = [
+        'last_name'  => 'e.last_name',
+        'hire_date'  => 'e.hire_date',
+        'birth_date' => 'e.birth_date',
+        'department' => 'd.name',
+        'position'   => 'p.title',
+        'status'     => 'e.status',
+        'id'         => 'e.id',
+    ];
+
+    private const DEFAULT_ORDER = 'e.last_name, e.first_name, e.id';
+
     private PDO $db;
 
     public function __construct(?PDO $db = null)
@@ -41,10 +60,12 @@ final class EmployeeRepository
 
     /**
      * Страница списка с поиском и фильтрами.
-     * @param array{q?: string, department_id?: int|string, status?: string} $filters
+     * $sort — поле из SORTS, с минусом по убыванию («-hire_date»).
+     * $clamp — номер больше последней страницы заменить последней (веб); API вернёт пустую страницу.
+     * @param array{q?: string, department_id?: int|string|int[]|null, status?: string|string[]} $filters
      * @return array{items: array, total: int, page: int, pages: int}
      */
-    public function paginate(array $filters, int $page, int $perPage = 10): array
+    public function paginate(array $filters, int $page, int $perPage = 10, string $sort = '', bool $clamp = true): array
     {
         [$where, $params] = $this->buildWhere($filters);
 
@@ -55,10 +76,11 @@ final class EmployeeRepository
 
         // 2) номер страницы не может быть меньше 1 и больше последней
         $pages = max(1, (int) ceil($total / $perPage));
-        $page = min(max(1, $page), $pages);
+        $page = $clamp ? min(max(1, $page), $pages) : max(1, $page);
 
         // 3) нужная страница: LIMIT — сколько строк, OFFSET — сколько пропустить
-        $sql = self::SELECT . " {$where} ORDER BY e.last_name, e.first_name, e.id LIMIT :limit OFFSET :offset";
+        $order = Sql::orderBy($sort, self::SORTS, self::DEFAULT_ORDER);
+        $sql = self::SELECT . " {$where} ORDER BY {$order} LIMIT :limit OFFSET :offset";
         $stmt = $this->db->prepare($sql);
         foreach ($params as $name => $value) {
             $stmt->bindValue($name, $value);
@@ -80,16 +102,21 @@ final class EmployeeRepository
         if ($q !== '') {
             // Ищем по ФИО целиком: «Рахимов Фар» тоже найдётся
             $conditions[] = "CONCAT_WS(' ', e.last_name, e.first_name, e.middle_name) LIKE :q";
-            $params[':q'] = '%' . addcslashes($q, '%_\\') . '%';
+            $params[':q'] = '%' . Sql::escapeLike($q) . '%';
         }
-        // null и '' — «все кафедры»; любое другое значение (даже 0) — фильтр
-        if (isset($filters['department_id']) && $filters['department_id'] !== '') {
-            $conditions[] = 'e.department_id = :department_id';
-            $params[':department_id'] = (int) $filters['department_id'];
-        }
-        if (!empty($filters['status'])) {
-            $conditions[] = 'e.status = :status';
-            $params[':status'] = (string) $filters['status'];
+        // null, '' и [] — «все»; любое другое значение (даже 0) — фильтр. Массив → IN (...)
+        foreach (['department_id', 'status'] as $column) {
+            $value = $filters[$column] ?? '';
+            if ($value === '' || $value === []) {
+                continue;
+            }
+            $values = array_values((array) $value);
+            if ($column === 'department_id') {
+                $values = array_map('intval', $values);
+            }
+            [$placeholders, $inParams] = Sql::in($column, $values);
+            $conditions[] = "e.{$column} IN ({$placeholders})";   // $column — из списка выше, не от пользователя
+            $params += $inParams;
         }
 
         $where = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
@@ -156,6 +183,31 @@ final class EmployeeRepository
             SELECT id, CONCAT_WS(' ', last_name, first_name, middle_name) AS full_name
             FROM employees WHERE status <> 'dismissed'
             ORDER BY last_name, first_name")->fetchAll();
+    }
+
+    /** Заведует ли сотрудник какой-либо кафедрой */
+    public function isHead(int $id): bool
+    {
+        $stmt = $this->db->prepare('SELECT COUNT(*) FROM departments WHERE head_employee_id = :id');
+        $stmt->execute([':id' => $id]);
+
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    /** Строка сотрудника для изменения. FOR UPDATE блокирует строку до конца транзакции */
+    public function findForUpdate(int $id): ?array
+    {
+        $stmt = $this->db->prepare('SELECT * FROM employees WHERE id = :id FOR UPDATE');
+        $stmt->execute([':id' => $id]);
+
+        return $stmt->fetch() ?: null;
+    }
+
+    public function setPlace(int $id, int $departmentId, int $positionId): void
+    {
+        $stmt = $this->db->prepare('
+            UPDATE employees SET department_id = :department_id, position_id = :position_id WHERE id = :id');
+        $stmt->execute([':department_id' => $departmentId, ':position_id' => $positionId, ':id' => $id]);
     }
 
     public function updatePhoto(int $id, ?string $path): void
