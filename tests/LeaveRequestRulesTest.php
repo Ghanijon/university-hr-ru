@@ -156,4 +156,30 @@ final class LeaveRequestRulesTest extends TestCase
         $this->assertTrue(LeaveRequestRules::canDecide(['status' => 'head_approved', 'employee_id' => 7, 'department_id' => 2], $hr, 'approve'));
         $this->assertFalse(LeaveRequestRules::canDecide(['status' => 'pending', 'employee_id' => 7, 'department_id' => 2], $hr, 'approve'));
     }
+
+    // ---------------------------------------------------------------- причина отказа (403 или 409 в API)
+
+    #[DataProvider('denials')]
+    public function testDenialReason(?string $expected, string $status, string $role, int $department = 1, int $employee = 2): void
+    {
+        $leave = ['status' => $status, 'employee_id' => $employee, 'department_id' => $department];
+        $user = ['role' => $role, 'employee_id' => 1, 'department_id' => 1];
+
+        self::assertSame($expected, LeaveRequestRules::denialReason($leave, $user, 'approve'));
+    }
+
+    public static function denials(): array
+    {
+        return [
+            'зав. кафедрой согласует'        => [null, 'pending', 'head'],
+            'зав. кафедрой повторно'         => ['conflict', 'head_approved', 'head'],
+            'чужая кафедра'                  => ['forbidden', 'pending', 'head', 2],
+            'своя заявка'                    => ['forbidden', 'pending', 'head', 1, 1],
+            'чужая кафедра, уже утверждена'  => ['forbidden', 'approved', 'head', 2],
+            'ОК раньше зав. кафедрой'        => ['forbidden', 'pending', 'hr'],
+            'ОК утверждает'                  => [null, 'head_approved', 'hr'],
+            'ОК повторно'                    => ['conflict', 'approved', 'hr'],
+            'сотрудник'                      => ['forbidden', 'approved', 'employee'],
+        ];
+    }
 }
