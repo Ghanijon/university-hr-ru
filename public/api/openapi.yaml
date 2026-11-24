@@ -1,0 +1,482 @@
+openapi: 3.0.3
+info:
+  title: university-hr REST API
+  version: 1.0.0
+  description: |
+    Кадровая система вуза: сотрудники, отпуска, отчёты.
+
+    **Как начать:** выполните `POST /auth/login`, скопируйте `token` из ответа,
+    нажмите **Authorize** и вставьте его (без слова Bearer).
+    Логины: `admin`, `hr`, `head_pis`, `teacher1`; пароль у всех `Secret123!`.
+  license: {name: MIT, url: 'https://opensource.org/license/mit'}
+servers:
+  - url: /api/v1
+    description: Этот же сервер
+security:
+  - bearerAuth: []
+tags:
+  - {name: Вход, description: Получить и отозвать токен}
+  - {name: Сотрудники, description: 'Список, карточка, изменение, перевод'}
+  - {name: Отпуска, description: Заявки и их согласование}
+  - {name: Справочники, description: Кафедры и должности}
+  - {name: Отчёты, description: Сводные данные}
+paths:
+  /auth/login:
+    post:
+      operationId: login
+      tags: [Вход]
+      summary: 'Войти и получить токен (8 часов)'
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object, required: [username, password], properties: {username: {type: string}, password: {type: string, format: password}}}
+            example: {username: hr, password: Secret123!}
+      responses:
+        '200':
+          description: Успешно
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Login'}
+              example: {token: 23705009d2878fd92e612de188e8d9842485a147a1a9ef706f7cec9a29c0cf17, expires_at: '2026-11-24T22:00:00+05:00', user: {id: 3, username: head_pis, role: head, full_name: Назаров Джамшед, employee_id: 1, department_id: 1}}
+        '400': {$ref: '#/components/responses/BadJson'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '422': {$ref: '#/components/responses/Validation'}
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [Вход]
+      summary: 'Выйти: токен перестаёт действовать'
+      responses:
+        '204': {description: Токен удалён}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /employees:
+    get:
+      operationId: listEmployees
+      tags: [Сотрудники]
+      summary: 'Список с поиском, фильтрами и сортировкой'
+      description: >-
+        Роли: admin, hr — все; head — только своя кафедра.
+      parameters:
+        - {name: q, in: query, schema: {type: string}, description: 'Часть ФИО'}
+        - {name: department_id, in: query, schema: {type: string}, description: 'Номера кафедр через запятую, например 1,2 → IN (...)'}
+        - {name: status, in: query, schema: {type: string}, description: 'Статусы через запятую: active,on_leave,dismissed'}
+        - {name: sort, in: query, schema: {type: string, enum: [last_name, -last_name, hire_date, -hire_date, birth_date, -birth_date, department, -department, position, -position, status, -status, id, -id]}, description: 'Поле из белого списка; минус — по убыванию'}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/PerPage'}
+      responses:
+        '200':
+          description: Успешно
+          content:
+            application/json:
+              schema: {type: object, required: [data, meta], properties: {data: {type: array, items: {$ref: '#/components/schemas/Employee'}}, meta: {$ref: '#/components/schemas/Meta'}}}
+              example: {data: [{id: 2, last_name: Рахимов, first_name: Фарход, middle_name: Джамшедович, birth_date: '1990-06-21', gender: m, phone: '+992 92 701 11 02', email: f.rahimov@example.tj, department_id: 1, department_name: Кафедра программирования и информационных систем, position_id: 4, position_title: Старший преподаватель, academic_degree: none, hire_date: '2014-09-01', status: active}], meta: {page: 1, per_page: 10, total: 1}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '422': {$ref: '#/components/responses/Validation'}
+    post:
+      operationId: createEmployee
+      tags: [Сотрудники]
+      summary: 'Добавить сотрудника'
+      description: >-
+        Роли: admin, hr.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/EmployeeInput'}
+            example: {last_name: Азизов, first_name: Алишер, middle_name: null, birth_date: '1992-05-10', gender: m, phone: '+992 92 700 00 00', email: a.azizov@example.tj, department_id: 1, position_id: 5, academic_degree: none, hire_date: '2026-09-01', status: active}
+      responses:
+        '201':
+          description: Создан, адрес — в заголовке Location
+          content:
+            application/json:
+              schema: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/Employee'}}}
+              example: {data: {id: 47, last_name: Азизов, first_name: Алишер, middle_name: null, birth_date: '1992-05-10', gender: m, phone: '+992 92 700 00 00', email: a.azizov@example.tj, department_id: 1, department_name: Кафедра программирования и информационных систем, position_id: 5, position_title: Преподаватель, academic_degree: none, hire_date: '2026-09-01', status: active}}
+        '400': {$ref: '#/components/responses/BadJson'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/Validation'}
+  /employees/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: integer, minimum: 1}, example: 2}
+    get:
+      operationId: getEmployee
+      tags: [Сотрудники]
+      summary: 'Карточка сотрудника'
+      description: >-
+        Роли: admin, hr — любая; head — своя кафедра; employee — только своя.
+      responses:
+        '200':
+          description: Успешно
+          content:
+            application/json:
+              schema: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/Employee'}}}
+              example: {data: {id: 2, last_name: Рахимов, first_name: Фарход, middle_name: Джамшедович, birth_date: '1990-06-21', gender: m, phone: '+992 92 701 11 02', email: f.rahimov@example.tj, department_id: 1, department_name: Кафедра программирования и информационных систем, position_id: 4, position_title: Старший преподаватель, academic_degree: none, hire_date: '2014-09-01', status: active}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      operationId: updateEmployee
+      tags: [Сотрудники]
+      summary: 'Изменить сотрудника (полная замена)'
+      description: >-
+        Роли: admin, hr. Не переданные необязательные поля станут пустыми.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/EmployeeInput'}
+            example: {last_name: Рахимов, first_name: Фарход, middle_name: Джамшедович, birth_date: '1990-06-21', gender: m, phone: '+992 92 701 11 99', email: f.rahimov@example.tj, department_id: 1, position_id: 4, academic_degree: none, hire_date: '2014-09-01', status: active}
+      responses:
+        '200':
+          description: Успешно
+          content:
+            application/json:
+              schema: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/Employee'}}}
+              example: {data: {id: 2, last_name: Рахимов, first_name: Фарход, middle_name: Джамшедович, birth_date: '1990-06-21', gender: m, phone: '+992 92 701 11 99', email: f.rahimov@example.tj, department_id: 1, department_name: Кафедра программирования и информационных систем, position_id: 4, position_title: Старший преподаватель, academic_degree: none, hire_date: '2014-09-01', status: active}}
+        '400': {$ref: '#/components/responses/BadJson'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/Validation'}
+    delete:
+      operationId: deleteEmployee
+      tags: [Сотрудники]
+      summary: 'Удалить сотрудника'
+      description: >-
+        Роли: admin, hr. Если по сотруднику есть приказы — 409.
+      responses:
+        '204': {description: Удалён}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /employees/{id}/transfer:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: integer, minimum: 1}, example: 2}
+    post:
+      operationId: transferEmployee
+      tags: [Сотрудники]
+      summary: 'Перевести: UPDATE сотрудника + приказ в одной транзакции'
+      description: >-
+        Роли: admin, hr. Дата — не раньше приёма и не в будущем.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object, required: [department_id, position_id, date], properties: {department_id: {type: integer}, position_id: {type: integer}, date: {type: string, format: date}}}
+            example: {department_id: 2, position_id: 3, date: '2026-11-24'}
+      responses:
+        '200':
+          description: Успешно
+          content:
+            application/json:
+              schema: {type: object, required: [data], properties: {data: {type: object, properties: {employee: {$ref: '#/components/schemas/Employee'}, order: {$ref: '#/components/schemas/Order'}}}}}
+              example: {data: {employee: {id: 2, last_name: Рахимов, first_name: Фарход, middle_name: Джамшедович, birth_date: '1990-06-21', gender: m, phone: '+992 92 701 11 02', email: f.rahimov@example.tj, department_id: 2, department_name: Кафедра сетей связи и систем коммутации, position_id: 3, position_title: Доцент, academic_degree: none, hire_date: '2014-09-01', status: active}, order: {id: 9, number: ПЕ-2026-0001, date: '2026-11-24', text: 'Перевести: Рахимов Ф. Д. Новое место работы: Кафедра сетей связи и систем коммутации, должность «Доцент», с 24.11.2026.'}}}
+        '400': {$ref: '#/components/responses/BadJson'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/Validation'}
+  /departments:
+    get:
+      operationId: listDepartments
+      tags: [Справочники]
+      summary: 'Кафедры'
+      description: >-
+        Роли: admin, hr, head.
+      responses:
+        '200':
+          description: Успешно
+          content:
+            application/json:
+              schema: {type: object, required: [data], properties: {data: {type: array, items: {$ref: '#/components/schemas/Department'}}}}
+              example: {data: [{id: 1, name: Кафедра программирования и информационных систем, faculty_id: 1, faculty_name: Факультет информационных технологий и коммуникаций, head_name: Назаров Джамшед Хакимович, employees_count: 7}]}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /positions:
+    get:
+      operationId: listPositions
+      tags: [Справочники]
+      summary: 'Должности'
+      description: >-
+        Роли: admin, hr, head.
+      responses:
+        '200':
+          description: Успешно
+          content:
+            application/json:
+              schema: {type: object, required: [data], properties: {data: {type: array, items: {$ref: '#/components/schemas/Position'}}}}
+              example: {data: [{id: 4, title: Старший преподаватель, category: academic}]}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /leaves:
+    get:
+      operationId: listLeaves
+      tags: [Отпуска]
+      summary: 'Заявки на отпуск'
+      description: >-
+        admin, hr — все; head — своя кафедра; employee — только свои.
+      parameters:
+        - {name: status, in: query, schema: {$ref: '#/components/schemas/LeaveStatus'}, description: 'Статус заявки'}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/PerPage'}
+      responses:
+        '200':
+          description: Успешно
+          content:
+            application/json:
+              schema: {type: object, required: [data, meta], properties: {data: {type: array, items: {$ref: '#/components/schemas/LeaveRequest'}}, meta: {$ref: '#/components/schemas/Meta'}}}
+              example: {data: [{id: 1, employee_id: 2, employee_name: Рахимов Фарход Джамшедович, department_id: 1, department_name: Кафедра программирования и информационных систем, type: annual, start_date: '2026-12-21', end_date: '2027-01-10', days: 21, reason: Ежегодный отпуск в зимние каникулы, status: pending, head_decision_by: null, hr_decision_by: null, created_at: '2026-10-28 09:15:00'}], meta: {page: 1, per_page: 10, total: 1}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '422': {$ref: '#/components/responses/Validation'}
+    post:
+      operationId: createLeave
+      tags: [Отпуска]
+      summary: 'Подать заявку'
+      description: >-
+        admin и hr указывают employee_id; head и employee подают только за себя (employee_id не учитывается).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/LeaveInput'}
+            example: {employee_id: 2, type: study, start_date: '2027-03-01', end_date: '2027-03-10', reason: Курсы повышения квалификации}
+      responses:
+        '201':
+          description: Заявка создана
+          content:
+            application/json:
+              schema: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/LeaveRequest'}}}
+              example: {data: {id: 13, employee_id: 2, employee_name: Рахимов Фарход Джамшедович, department_id: 1, department_name: Кафедра программирования и информационных систем, type: study, start_date: '2027-03-01', end_date: '2027-03-10', days: 10, reason: Курсы повышения квалификации, status: pending, head_decision_by: null, hr_decision_by: null, created_at: '2026-11-24 10:00:00'}}
+        '400': {$ref: '#/components/responses/BadJson'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '422': {$ref: '#/components/responses/Validation'}
+  /leaves/{id}/approve:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: integer, minimum: 1}, example: 1}
+    post:
+      operationId: approveLeave
+      tags: [Отпуска]
+      summary: 'Согласовать / утвердить'
+      description: >-
+        pending → head_approved (head, admin); head_approved → approved и приказ (hr, admin). Если передан expected_status и он не совпал с текущим — 409.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: {type: object, properties: {expected_status: {$ref: '#/components/schemas/LeaveStatus'}}}
+            example: {expected_status: pending}
+      responses:
+        '200':
+          description: Успешно
+          content:
+            application/json:
+              schema: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/LeaveRequest'}}}
+              example: {data: {id: 1, employee_id: 2, employee_name: Рахимов Фарход Джамшедович, department_id: 1, department_name: Кафедра программирования и информационных систем, type: annual, start_date: '2026-12-21', end_date: '2027-01-10', days: 21, reason: Ежегодный отпуск в зимние каникулы, status: head_approved, head_decision_by: 3, hr_decision_by: null, created_at: '2026-10-28 09:15:00'}}
+        '400': {$ref: '#/components/responses/BadJson'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/Validation'}
+  /leaves/{id}/reject:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: integer, minimum: 1}, example: 1}
+    post:
+      operationId: rejectLeave
+      tags: [Отпуска]
+      summary: 'Отклонить'
+      description: >-
+        На этапе pending — head, admin; на этапе head_approved — hr, admin. Если передан expected_status и он не совпал с текущим — 409.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: {type: object, properties: {expected_status: {$ref: '#/components/schemas/LeaveStatus'}}}
+            example: {expected_status: pending}
+      responses:
+        '200':
+          description: Успешно
+          content:
+            application/json:
+              schema: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/LeaveRequest'}}}
+              example: {data: {id: 1, employee_id: 2, employee_name: Рахимов Фарход Джамшедович, department_id: 1, department_name: Кафедра программирования и информационных систем, type: annual, start_date: '2026-12-21', end_date: '2027-01-10', days: 21, reason: Ежегодный отпуск в зимние каникулы, status: rejected, head_decision_by: 3, hr_decision_by: null, created_at: '2026-10-28 09:15:00'}}
+        '400': {$ref: '#/components/responses/BadJson'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/Validation'}
+  /reports/staff:
+    get:
+      operationId: staffReport
+      tags: [Отчёты]
+      summary: 'Штат по кафедрам'
+      description: >-
+        Роли: admin, hr, head. Уволенные не учитываются.
+      responses:
+        '200':
+          description: Успешно
+          content:
+            application/json:
+              schema: {type: object, required: [data, totals], properties: {data: {type: array, items: {$ref: '#/components/schemas/StaffRow'}}, totals: {$ref: '#/components/schemas/StaffNumbers'}}}
+              example: {data: [{department_id: 1, department_name: Кафедра программирования и информационных систем, faculty_name: Факультет информационных технологий и коммуникаций, total: 7, academic: 5, with_degree: 2, on_leave: 0}], totals: {total: 45, academic: 38, with_degree: 19, on_leave: 2}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer, description: Токен из ответа POST /auth/login}
+  parameters:
+    Page: {name: page, in: query, schema: {type: integer, minimum: 1, default: 1}, description: Номер страницы}
+    PerPage: {name: per_page, in: query, schema: {type: integer, minimum: 1, maximum: 100, default: 10}, description: Записей на странице}
+  responses:
+    BadJson:
+      description: Тело запроса — не JSON
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+          example: {error: {code: bad_json, message: 'Тело запроса — не корректный JSON'}}
+    Unauthorized:
+      description: Нет токена, токен недействителен или неверный пароль
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+          example: {error: {code: unauthorized, message: 'Нужен заголовок Authorization: Bearer <токен>'}}
+    Forbidden:
+      description: Нет прав
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+          example: {error: {code: forbidden, message: 'У вашей роли нет прав для этого действия'}}
+    NotFound:
+      description: Запись не найдена
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+          example: {error: {code: not_found, message: 'Сотрудник не найден'}}
+    Conflict:
+      description: Действие противоречит текущему состоянию данных
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+          example: {error: {code: conflict, message: 'Нельзя удалить сотрудника, по которому есть приказы. Измените статус на «Уволен».'}}
+    Validation:
+      description: Ошибка в данных
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+          example: {error: {code: validation_failed, message: 'Проверьте данные запроса', fields: {email: 'Поле «E-mail»: некорректный e-mail'}}}
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: {type: string, description: Код для программы}
+            message: {type: string, description: Текст для человека}
+            fields: {type: object, additionalProperties: {type: string}, description: Ошибки по полям}
+    Meta:
+      type: object
+      properties: {page: {type: integer}, per_page: {type: integer}, total: {type: integer}}
+    Login:
+      type: object
+      required: [token, expires_at, user]
+      properties:
+        token: {type: string}
+        expires_at: {type: string, format: date-time}
+        user:
+          type: object
+          properties:
+            id: {type: integer}
+            username: {type: string}
+            role: {type: string, enum: [admin, hr, head, employee]}
+            full_name: {type: string, nullable: true}
+            employee_id: {type: integer, nullable: true}
+            department_id: {type: integer, nullable: true}
+    EmployeeInput:
+      type: object
+      required: [last_name, first_name, birth_date, gender, department_id, position_id, academic_degree, hire_date, status]
+      properties:
+        last_name: {type: string, maxLength: 60}
+        first_name: {type: string, maxLength: 60}
+        middle_name: {type: string, maxLength: 60, nullable: true}
+        birth_date: {type: string, format: date}
+        gender: {type: string, enum: [m, f]}
+        phone: {type: string, maxLength: 20, nullable: true}
+        email: {type: string, format: email, maxLength: 120, nullable: true}
+        department_id: {type: integer}
+        position_id: {type: integer}
+        academic_degree: {type: string, enum: [none, candidate, doctor, phd]}
+        hire_date: {type: string, format: date}
+        status: {type: string, enum: [active, on_leave, dismissed]}
+    Employee:
+      type: object
+      properties:
+        id: {type: integer}
+        last_name: {type: string, maxLength: 60}
+        first_name: {type: string, maxLength: 60}
+        middle_name: {type: string, maxLength: 60, nullable: true}
+        birth_date: {type: string, format: date}
+        gender: {type: string, enum: [m, f]}
+        phone: {type: string, maxLength: 20, nullable: true}
+        email: {type: string, format: email, maxLength: 120, nullable: true}
+        department_id: {type: integer}
+        position_id: {type: integer}
+        academic_degree: {type: string, enum: [none, candidate, doctor, phd]}
+        hire_date: {type: string, format: date}
+        status: {type: string, enum: [active, on_leave, dismissed]}
+        department_name: {type: string}
+        position_title: {type: string}
+    Order:
+      type: object
+      properties: {id: {type: integer}, number: {type: string}, date: {type: string, format: date}, text: {type: string}}
+    LeaveStatus: {type: string, enum: [pending, head_approved, approved, rejected]}
+    LeaveInput:
+      type: object
+      required: [type, start_date, end_date]
+      properties:
+        employee_id: {type: integer, description: Только для admin и hr}
+        type: {type: string, enum: [annual, study, unpaid, sick]}
+        start_date: {type: string, format: date}
+        end_date: {type: string, format: date}
+        reason: {type: string, maxLength: 255, nullable: true}
+    LeaveRequest:
+      type: object
+      properties:
+        id: {type: integer}
+        employee_id: {type: integer}
+        employee_name: {type: string}
+        department_id: {type: integer}
+        department_name: {type: string}
+        type: {type: string, enum: [annual, study, unpaid, sick]}
+        start_date: {type: string, format: date}
+        end_date: {type: string, format: date}
+        days: {type: integer}
+        reason: {type: string, nullable: true}
+        status: {$ref: '#/components/schemas/LeaveStatus'}
+        head_decision_by: {type: integer, nullable: true}
+        hr_decision_by: {type: integer, nullable: true}
+        created_at: {type: string}
+    Department:
+      type: object
+      properties: {id: {type: integer}, name: {type: string}, faculty_id: {type: integer}, faculty_name: {type: string}, head_name: {type: string, nullable: true}, employees_count: {type: integer}}
+    Position:
+      type: object
+      properties: {id: {type: integer}, title: {type: string}, category: {type: string, enum: [academic, administrative, support]}}
+    StaffNumbers:
+      type: object
+      properties: {total: {type: integer}, academic: {type: integer}, with_degree: {type: integer}, on_leave: {type: integer}}
+    StaffRow:
+      allOf:
+        - {$ref: '#/components/schemas/StaffNumbers'}
+        - type: object
+          properties: {department_id: {type: integer}, department_name: {type: string}, faculty_name: {type: string}}
