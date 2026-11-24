@@ -17,6 +17,8 @@ final class LeaveRequestRules
     /** Ежегодный отпуск педагогических работников — до 56 календарных дней */
     public const MAX_ANNUAL_DAYS = 56;
 
+    public const STATUSES = ['pending', 'head_approved', 'approved', 'rejected'];
+
     public const TYPES = ['annual', 'study', 'unpaid', 'sick'];
 
     /**
@@ -101,16 +103,44 @@ final class LeaveRequestRules
      */
     public static function canDecide(array $leave, array $user, string $action): bool
     {
-        if (self::nextStatus($leave['status'], $action, $user['role']) === null) {
-            return false;
+        return self::denialReason($leave, $user, $action) === null;
+    }
+
+    /**
+     * Почему действие недоступно: 'forbidden' — нет прав (в API 403),
+     * 'conflict' — решение по этой заявке уже принято (в API 409), null — можно.
+     */
+    public static function denialReason(array $leave, array $user, string $action): ?string
+    {
+        if ($user['role'] === 'employee') {
+            return 'forbidden';
         }
         if ($user['role'] === 'head') {
             $sameDepartment = (int) $leave['department_id'] === (int) ($user['department_id'] ?? 0);
             $ownRequest = (int) $leave['employee_id'] === (int) ($user['employee_id'] ?? 0);
-
-            return $sameDepartment && !$ownRequest;
+            if (!$sameDepartment || $ownRequest) {
+                return 'forbidden';
+            }
+        }
+        if (self::nextStatus($leave['status'], $action, $user['role']) !== null) {
+            return null;
         }
 
-        return true;
+        // Статус конечный, либо пользователь решает на первом этапе, а этот этап уже пройден
+        $final = !isset(self::TRANSITIONS[$leave['status']]);
+        $stagePassed = $leave['status'] === 'head_approved'
+            && self::nextStatus('pending', $action, $user['role']) !== null;
+
+        return $final || $stagePassed ? 'conflict' : 'forbidden';
+    }
+
+    /** Какие заявки видит пользователь: сотрудник — свои, заведующий — своей кафедры, ОК и админ — все */
+    public static function visibilityFilter(array $user): array
+    {
+        return match ($user['role']) {
+            'employee' => ['employee_id' => (int) $user['employee_id']],
+            'head'     => ['department_id' => (int) $user['department_id']],
+            default    => [],
+        };
     }
 }

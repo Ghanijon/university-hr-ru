@@ -30,7 +30,7 @@ final class LeaveRequestRepository
      * Список заявок с фильтрами и пагинацией.
      * @param array{employee_id?: int, department_id?: int, status?: string} $filters
      */
-    public function list(array $filters, int $page = 1, int $perPage = 10): array
+    public function list(array $filters, int $page = 1, int $perPage = 10, bool $clamp = true): array
     {
         [$where, $params] = $this->buildWhere($filters);
 
@@ -38,7 +38,7 @@ final class LeaveRequestRepository
         $stmt->execute($params);
         $total = (int) $stmt->fetchColumn();
         $pages = max(1, (int) ceil($total / $perPage));
-        $page = min(max(1, $page), $pages);
+        $page = $clamp ? min(max(1, $page), $pages) : max(1, $page);
 
         // Сначала заявки, ожидающие решения, затем — по дате подачи (новые сверху)
         $sql = self::SELECT . " {$where}
@@ -141,15 +141,16 @@ final class LeaveRequestRepository
 
     /**
      * Решение заведующего (1-й уровень).
-     * Условие «AND status = 'pending'» защищает от двойного нажатия и гонки:
-     * если кто-то уже изменил заявку, UPDATE не затронет ни одной строки.
+     * Оптимистическая блокировка: строку заранее не запираем, а при записи проверяем, что статус
+     * всё ещё тот, который видел пользователь ($expected). Если заявку уже изменили,
+     * UPDATE не затронет ни одной строки: rowCount() === 0 → вернём false (в API это 409).
      */
-    public function setHeadDecision(int $id, string $status, int $userId): bool
+    public function setHeadDecision(int $id, string $expected, string $status, int $userId): bool
     {
-        $stmt = $this->db->prepare("
+        $stmt = $this->db->prepare('
             UPDATE leave_requests SET status = :status, head_decision_by = :user_id
-            WHERE id = :id AND status = 'pending'");
-        $stmt->execute([':status' => $status, ':user_id' => $userId, ':id' => $id]);
+            WHERE id = :id AND status = :expected');
+        $stmt->execute([':status' => $status, ':user_id' => $userId, ':id' => $id, ':expected' => $expected]);
 
         return $stmt->rowCount() === 1;
     }
@@ -158,15 +159,15 @@ final class LeaveRequestRepository
      * Решение отдела кадров (2-й уровень). При утверждении в ТОЙ ЖЕ транзакции
      * создаётся приказ об отпуске: либо выполнятся оба действия, либо ни одного.
      */
-    public function setHrDecision(int $id, string $status, int $userId): bool
+    public function setHrDecision(int $id, string $expected, string $status, int $userId): bool
     {
-        $this->db->beginTransaction();
+        $this->db->beginTransaction();              // с этого места изменения видит только наше соединение
         try {
-            $stmt = $this->db->prepare("
+            $stmt = $this->db->prepare('
                 UPDATE leave_requests SET status = :status, hr_decision_by = :user_id
-                WHERE id = :id AND status = 'head_approved'");
-            $stmt->execute([':status' => $status, ':user_id' => $userId, ':id' => $id]);
-            if ($stmt->rowCount() !== 1) {
+                WHERE id = :id AND status = :expected');
+            $stmt->execute([':status' => $status, ':user_id' => $userId, ':id' => $id, ':expected' => $expected]);
+            if ($stmt->rowCount() !== 1) {          // опоздали: статус уже другой
                 $this->db->rollBack();
                 return false;
             }
@@ -175,12 +176,12 @@ final class LeaveRequestRepository
                 $this->createLeaveOrder($id, $userId);
             }
 
-            $this->db->commit();
+            $this->db->commit();                    // заявка и приказ сохраняются вместе
 
             return true;
         } catch (Throwable $e) {
-            $this->db->rollBack();
-            throw $e;
+            $this->db->rollBack();                  // приказ не создан → и заявка остаётся прежней
+            throw $e;                               // ошибку не прячем, её обработает вызывающий код
         }
     }
 

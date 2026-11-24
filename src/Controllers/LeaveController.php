@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Core\Validator;
 use App\Repositories\EmployeeRepository;
 use App\Repositories\LeaveRequestRepository;
 use App\Services\LeaveRequestRules;
+use App\Services\LeaveRequestValidator;
 
 final class LeaveController extends Controller
 {
-    private const STATUSES = ['pending', 'head_approved', 'approved', 'rejected'];
-
     private LeaveRequestRepository $leaves;
 
     public function __construct()
@@ -27,8 +25,8 @@ final class LeaveController extends Controller
         $user = $this->requireRole('admin', 'hr', 'head', 'employee');
 
         $status = (string) ($_GET['status'] ?? '');
-        $filters = $this->visibilityFilter($user);
-        if (in_array($status, self::STATUSES, true)) {
+        $filters = LeaveRequestRules::visibilityFilter($user);
+        if (in_array($status, LeaveRequestRules::STATUSES, true)) {
             $filters['status'] = $status;
         }
 
@@ -36,8 +34,8 @@ final class LeaveController extends Controller
 
         // Счётчики для вкладок-фильтров
         $counts = [];
-        foreach (self::STATUSES as $s) {
-            $counts[$s] = $this->leaves->countByStatus($s, $this->visibilityFilter($user));
+        foreach (LeaveRequestRules::STATUSES as $s) {
+            $counts[$s] = $this->leaves->countByStatus($s, LeaveRequestRules::visibilityFilter($user));
         }
 
         $this->render('leaves/index', [
@@ -64,40 +62,7 @@ final class LeaveController extends Controller
         $this->verifyCsrf();
         $user = $this->requireRole('admin', 'hr', 'head', 'employee');
 
-        // Сотрудник и заведующий подают заявку только за себя; ОК и администратор — за любого сотрудника
-        $onBehalf = in_array($user['role'], ['admin', 'hr'], true);
-        $employeeId = $onBehalf ? (int) ($_POST['employee_id'] ?? 0) : (int) $user['employee_id'];
-
-        $v = new Validator($_POST);
-        $v->required('type', 'Тип отпуска')->in('type', LeaveRequestRules::TYPES, 'Тип отпуска')
-          ->required('start_date', 'Дата начала')
-          ->required('end_date', 'Дата окончания')
-          ->maxLength('reason', 255, 'Причина');
-        $errors = $v->errors();
-
-        $employee = $employeeId > 0 ? (new EmployeeRepository())->find($employeeId) : null;
-        if ($employee === null) {
-            $errors['employee_id'] = 'Выберите сотрудника';
-        } elseif ($employee['status'] === 'dismissed') {
-            $errors['employee_id'] = 'Уволенный сотрудник не может подать заявку';
-        }
-
-        $data = [
-            'employee_id' => $employeeId,
-            'type'        => (string) ($_POST['type'] ?? ''),
-            'start_date'  => trim((string) ($_POST['start_date'] ?? '')),
-            'end_date'    => trim((string) ($_POST['end_date'] ?? '')),
-            'reason'      => trim((string) ($_POST['reason'] ?? '')) ?: null,
-        ];
-
-        // Бизнес-правила дат — в отдельном тестируемом классе
-        if (!isset($errors['start_date']) && !isset($errors['end_date'])) {
-            $errors += LeaveRequestRules::validateDates($data['start_date'], $data['end_date'], $data['type']);
-        }
-        if (!$errors && $this->leaves->hasOverlap($employeeId, $data['start_date'], $data['end_date'])) {
-            $errors['start_date'] = 'На эти даты у сотрудника уже есть заявка';
-        }
-
+        [$data, $errors] = (new LeaveRequestValidator($this->leaves))->validate($_POST, $user);
         if ($errors) {
             $this->renderForm($user, $_POST, $errors, 422);
             return;
@@ -138,8 +103,8 @@ final class LeaveController extends Controller
 
         $next = LeaveRequestRules::nextStatus($leave['status'], $action, $user['role']);
         $saved = $leave['status'] === 'pending'
-            ? $this->leaves->setHeadDecision($id, $next, (int) $user['id'])
-            : $this->leaves->setHrDecision($id, $next, (int) $user['id']);
+            ? $this->leaves->setHeadDecision($id, $leave['status'], $next, (int) $user['id'])
+            : $this->leaves->setHrDecision($id, $leave['status'], $next, (int) $user['id']);
 
         if (!$saved) {
             $this->flash('warning', 'Заявку уже изменил другой пользователь. Обновите список.');
@@ -152,16 +117,6 @@ final class LeaveController extends Controller
             $this->flash('success', $messages[$next]);
         }
         $this->redirect('/leaves');
-    }
-
-    /** Какие заявки видит пользователь: сотрудник — свои, заведующий — своей кафедры, ОК и админ — все */
-    private function visibilityFilter(array $user): array
-    {
-        return match ($user['role']) {
-            'employee' => ['employee_id' => (int) $user['employee_id']],
-            'head'     => ['department_id' => (int) $user['department_id']],
-            default    => [],
-        };
     }
 
     private function renderForm(array $user, array $values, array $errors, int $status = 200): void
