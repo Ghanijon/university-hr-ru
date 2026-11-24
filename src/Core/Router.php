@@ -26,6 +26,24 @@ final class Router
         $this->add('POST', $path, $handler);
     }
 
+    public function put(string $path, array $handler): void
+    {
+        $this->add('PUT', $path, $handler);
+    }
+
+    public function delete(string $path, array $handler): void
+    {
+        $this->add('DELETE', $path, $handler);
+    }
+
+    /** Запрос к REST API v1? Тогда любая ошибка отдаётся в JSON, а сессия не нужна. */
+    public static function isApi(string $uri): bool
+    {
+        $path = self::normalizePath($uri);
+
+        return $path === '/api/v1' || str_starts_with($path, '/api/v1/');
+    }
+
     private function add(string $method, string $path, array $handler): void
     {
         $this->routes[] = [
@@ -53,7 +71,7 @@ final class Router
      */
     public function dispatch(string $method, string $uri): void
     {
-        $path = $this->normalizePath($uri);
+        $path = self::normalizePath($uri);
         $allowedMethods = [];
 
         foreach ($this->routes as $route) {
@@ -78,11 +96,17 @@ final class Router
         if ($allowedMethods !== []) {
             http_response_code(405);
             header('Allow: ' . implode(', ', array_unique($allowedMethods)));
+            if (self::isApi($uri)) {
+                throw new ApiException(405, 'method_not_allowed', 'Метод ' . $method . ' для этого адреса не поддерживается');
+            }
             echo '405 Method Not Allowed';
 
             return;
         }
 
+        if (self::isApi($uri)) {
+            throw new ApiException(404, 'not_found', 'Такого адреса в API нет');
+        }
         http_response_code(404);
         echo (new View(dirname(__DIR__, 2) . '/views'))->render('errors/error', [
             'title'   => 'Страница не найдена',
@@ -92,7 +116,7 @@ final class Router
     }
 
     /** Убирает строку запроса (?q=...), базовый путь и лишний слеш в конце. */
-    private function normalizePath(string $uri): string
+    private static function normalizePath(string $uri): string
     {
         $path = parse_url($uri, PHP_URL_PATH) ?: '/';
         $base = self::basePath();

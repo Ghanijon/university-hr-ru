@@ -7,6 +7,12 @@
 
 declare(strict_types=1);
 
+use App\Controllers\Api\ApiController;
+use App\Controllers\Api\AuthController as ApiAuthController;
+use App\Controllers\Api\DictionaryController as ApiDictionaryController;
+use App\Controllers\Api\EmployeeController as ApiEmployeeController;
+use App\Controllers\Api\LeaveController as ApiLeaveController;
+use App\Controllers\Api\ReportController as ApiReportController;
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\DepartmentController;
@@ -43,15 +49,23 @@ if (!is_file($configFile)) {
     $configFile = BASE_PATH . '/config/config.example.php'; // значения по умолчанию для XAMPP
 }
 $config = require $configFile;
+$isApi = Router::isApi($_SERVER['REQUEST_URI']);
 
 date_default_timezone_set($config['timezone'] ?? 'Asia/Dushanbe');
-ini_set('display_errors', $config['debug'] ? '1' : '0');
+// В API предупреждения PHP на экран не выводим: они испортили бы JSON (останутся в логе)
+ini_set('display_errors', $config['debug'] && !$isApi ? '1' : '0');
 error_reporting(E_ALL);
 Database::configure($config['db']);
-Session::start();
+if (!$isApi) {
+    Session::start();   // API узнаёт пользователя по Bearer-токену, cookie ему не нужна
+}
 
-// Любое непойманное исключение → страница 500 (подробности — только в режиме debug)
-set_exception_handler(function (Throwable $e) use ($config): void {
+// Любое непойманное исключение → страница 500, а в API — JSON с кодом ошибки (подробности — только в режиме debug)
+set_exception_handler(function (Throwable $e) use ($config, $isApi): void {
+    if ($isApi) {
+        ApiController::sendException($e, $config['debug']);
+        return;
+    }
     error_log((string) $e);
     http_response_code(500);
     echo (new View(BASE_PATH . '/views'))->render('errors/error', [
@@ -91,5 +105,26 @@ $router->post('/leaves/{id}/reject', [LeaveController::class, 'reject']);
 $router->get('/reports/staff', [ReportController::class, 'staff']);
 
 $router->get('/api/employees', [EmployeeController::class, 'apiSearch']);
+
+// REST API v1 (описание: public/api/openapi.yaml, Swagger UI: /api/docs.html)
+$router->post('/api/v1/auth/login', [ApiAuthController::class, 'login']);
+$router->post('/api/v1/auth/logout', [ApiAuthController::class, 'logout']);
+
+$router->get('/api/v1/employees', [ApiEmployeeController::class, 'index']);
+$router->post('/api/v1/employees', [ApiEmployeeController::class, 'store']);
+$router->get('/api/v1/employees/{id}', [ApiEmployeeController::class, 'show']);
+$router->put('/api/v1/employees/{id}', [ApiEmployeeController::class, 'update']);
+$router->delete('/api/v1/employees/{id}', [ApiEmployeeController::class, 'delete']);
+$router->post('/api/v1/employees/{id}/transfer', [ApiEmployeeController::class, 'transfer']);
+
+$router->get('/api/v1/departments', [ApiDictionaryController::class, 'departments']);
+$router->get('/api/v1/positions', [ApiDictionaryController::class, 'positions']);
+
+$router->get('/api/v1/leaves', [ApiLeaveController::class, 'index']);
+$router->post('/api/v1/leaves', [ApiLeaveController::class, 'store']);
+$router->post('/api/v1/leaves/{id}/approve', [ApiLeaveController::class, 'approve']);
+$router->post('/api/v1/leaves/{id}/reject', [ApiLeaveController::class, 'reject']);
+
+$router->get('/api/v1/reports/staff', [ApiReportController::class, 'staff']);
 
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);

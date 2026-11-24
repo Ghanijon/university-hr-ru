@@ -1,6 +1,8 @@
 # Apache (XAMPP): все запросы, которые не являются существующими файлами
 # или папками, отправляем во front controller index.php
 RewriteEngine On
+# Apache (PHP-CGI/FPM) не передаёт PHP заголовок Authorization — передаём сами, он нужен REST API
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]

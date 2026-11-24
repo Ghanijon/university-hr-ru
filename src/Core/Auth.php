@@ -21,7 +21,26 @@ final class Auth
     /** Хеш-заглушка: проверяем пароль даже для несуществующего логина, чтобы время ответа было одинаковым */
     private const DUMMY_HASH = '$2y$10$mdBA2yShM42tlrJ7vr1BLuRHIXOaODbOzsknp/JcSMdMS42NzVUie';
 
+    /** Вход в веб-версию: проверяем пароль и запоминаем пользователя в сессии */
     public static function attempt(string $username, string $password): bool
+    {
+        $user = self::verifyCredentials($username, $password);
+        if ($user === null) {
+            return false;
+        }
+
+        Session::regenerate();
+        Session::set(self::SESSION_KEY, (int) $user['id']);
+        self::$user = null;
+
+        return true;
+    }
+
+    /**
+     * Проверка логина и пароля без сессии — общая для веб-версии и REST API.
+     * Возвращает пользователя или null.
+     */
+    public static function verifyCredentials(string $username, string $password): ?array
     {
         $users = new UserRepository();
         $user = $users->findByUsername($username);
@@ -30,20 +49,17 @@ final class Auth
         $passwordOk = password_verify($password, $hash);
 
         if ($user === null || !$passwordOk || !self::isUsable($user)) {
-            return false;
+            return null;
         }
 
         // Если алгоритм или «стоимость» хеширования изменились — обновляем хеш
         if (password_needs_rehash($user['password_hash'], PASSWORD_DEFAULT)) {
             $users->updatePasswordHash((int) $user['id'], password_hash($password, PASSWORD_DEFAULT));
         }
-
-        Session::regenerate();
-        Session::set(self::SESSION_KEY, (int) $user['id']);
         $users->touchLastLogin((int) $user['id']);
-        self::$user = null;
+        unset($user['password_hash']);
 
-        return true;
+        return $user;
     }
 
     /**
@@ -74,7 +90,7 @@ final class Auth
      * Без карточки неизвестны кафедра и «свои» заявки — такой пользователь не должен работать,
      * иначе фильтры по кафедре и сотруднику не применятся и он увидит чужие данные.
      */
-    private static function isUsable(array $user): bool
+    public static function isUsable(array $user): bool
     {
         if (!(int) $user['is_active']) {
             return false;
